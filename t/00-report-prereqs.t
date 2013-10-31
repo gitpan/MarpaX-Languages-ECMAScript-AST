@@ -10,8 +10,10 @@ use File::Spec::Functions;
 use List::Util qw/max/;
 
 my @modules = qw(
+  CHI
   Carp
   Data::Dumper
+  Digest::MD4
   Exporter
   ExtUtils::MakeMaker
   File::Spec

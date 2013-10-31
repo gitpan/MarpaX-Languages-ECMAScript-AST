@@ -7,8 +7,13 @@ package MarpaX::Languages::ECMAScript::AST;
 
 use Carp qw/croak/;
 use MarpaX::Languages::ECMAScript::AST::Grammar qw//;
+use Digest::MD4 qw/md4_hex/;
+use CHI;
 
-our $VERSION = '0.001'; # TRIAL VERSION
+our $cache = CHI->new(driver => 'File',
+		      max_key_length => 32);
+
+our $VERSION = '0.002'; # TRIAL VERSION
 
 
 # ----------------------------------------------------------------------------------------
@@ -16,13 +21,12 @@ sub new {
   my ($class, %opts) = @_;
 
   my $grammarName = $opts{grammarName} || 'ECMAScript-262-5';
-
-  my $grammar = MarpaX::Languages::ECMAScript::AST::Grammar->new($grammarName);
+  my $cache       = $opts{cache} // 1;
 
   my $self  = {
-               _grammar            => $grammar,
-               _sourcep            => undef,
-              };
+      _grammarName => $grammarName,
+      _cache       => $cache
+  };
 
   bless($self, $class);
 
@@ -33,15 +37,34 @@ sub new {
 
 
 sub parse {
-  my ($self, $sourcep) = @_;
+  my ($self, $source) = @_;
+
+  my $parse = sub {
+      if (! defined($self->{_grammar})) {
+	  $self->{_grammar} = MarpaX::Languages::ECMAScript::AST::Grammar->new($self->{_grammarName});
+      }
+      my $grammar     = $self->{_grammar}->program->{grammar};
+      my $impl        = $self->{_grammar}->program->{impl};
+
+      return $grammar->parse($source, $impl)->value($impl);
+  };
 
   #
-  # Step 1: parse the source
+  # If cache is enabled, compute the MD4 and check availability
   #
-  my $grammar     = $self->{_grammar}->program->{grammar};
-  my $impl        = $self->{_grammar}->program->{impl};
-  $grammar->parse($sourcep, $impl);
-  $self->{_value} = $grammar->value($impl);
+  if ($self->{_cache}) {
+      my $md4 = md4_hex($source);
+      my $hashp = $cache->get($md4) || {};
+      my $ast = $hashp->{$source} || undef;
+      if (defined($ast)) {
+	  return $ast;
+      }
+      $hashp->{$source} = &$parse();
+      $cache->set($md4, $hashp);
+      return $hashp->{$source};
+  } else {
+      return &$parse();
+  }
 }
 
 
@@ -59,7 +82,7 @@ MarpaX::Languages::ECMAScript::AST - Translate a ECMAScript source to an AST
 
 =head1 VERSION
 
-version 0.001
+version 0.002
 
 =head1 SYNOPSIS
 
@@ -69,7 +92,6 @@ version 0.001
     use Log::Log4perl qw/:easy/;
     use Log::Any::Adapter;
     use Log::Any qw/$log/;
-    use Data::Dumper;
     #
     # Init log
     #
@@ -85,7 +107,7 @@ version 0.001
     #
     # Parse ECMAScript
     #
-    my $ecmaSourceCode = 'select * from myTable;';
+    my $ecmaSourceCode = 'var i = 0;';
     my $ecmaAstObject = MarpaX::Languages::ECMAScript::AST->new();
     $log->infof('%s', $ecmaAstObject->parse(\$ecmaSourceCode));
 
@@ -105,15 +127,19 @@ Instantiate a new object. Takes as parameter an optional hash of options that ca
 
 Name of a grammar. Default is 'ECMAScript-262-5'.
 
+=item cache
+
+Produced AST can be cached: very often the same ECMAScript is used again and again, so there is no need to always compute it at each call. The cache is based on a key that the buffer MD4 checksum, eventual collisions being handled. The cache location is the default CHI::Driver::File location. Default is a true value.
+
 =back
 
-=head2 parse($self, $sourcep)
+=head2 parse($self, $source)
 
-Get and AST from the ECMAScript source, pointed by $sourcep. This method will call all the intermediary steps (lexical, transformation, evaluation) necessary to produce the AST.
+Get and AST from the ECMAScript source, pointed by $source. This method will call all the intermediary steps (lexical, transformation, evaluation) necessary to produce the AST.
 
 =head1 SEE ALSO
 
-L<Log::Any>, L<Marpa::R2>
+L<Log::Any>, L<Marpa::R2>, L<Digest::MD4>, L<CHI::Driver::File>
 
 =for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
 

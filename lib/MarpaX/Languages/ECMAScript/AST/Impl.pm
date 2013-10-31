@@ -9,7 +9,7 @@ use Marpa::R2 2.074;
 use Carp qw/croak/;
 use MarpaX::Languages::ECMAScript::AST::Impl::Logger;
 
-our $VERSION = '0.001'; # TRIAL VERSION
+our $VERSION = '0.002'; # TRIAL VERSION
 
 our $MARPA_TRACE_FILE_HANDLE;
 our $MARPA_TRACE_BUFFER;
@@ -175,7 +175,7 @@ MarpaX::Languages::ECMAScript::AST::Impl - Implementation of Marpa's interface
 
 =head1 VERSION
 
-version 0.001
+version 0.002
 
 =head1 SYNOPSIS
 

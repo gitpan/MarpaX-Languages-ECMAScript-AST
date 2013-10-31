@@ -5,7 +5,7 @@ package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::
 
 # ABSTRACT: ECMAScript 262, Edition 5, grammar actions
 
-our $VERSION = '0.001'; # TRIAL VERSION
+our $VERSION = '0.002'; # TRIAL VERSION
 
 
 
@@ -30,7 +30,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Actions 
 
 =head1 VERSION
 
-version 0.001
+version 0.002
 
 =head1 DESCRIPTION
 

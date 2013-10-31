@@ -6,7 +6,7 @@ use Exporter 'import';
 
 # ABSTRACT: ECMAScript, character classes
 
-our $VERSION = '0.001'; # TRIAL VERSION
+our $VERSION = '0.002'; # TRIAL VERSION
 
 
 our @EXPORT_OK = qw/
@@ -681,7 +681,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses - ECMAScript, char
 
 =head1 VERSION
 
-version 0.001
+version 0.002
 
 =head1 SYNOPSIS
 
@@ -695,8 +695,7 @@ version 0.001
 
 =head2 IsZWNJ()
 
-=head2 sub IsZWJ { return <<END;
-()
+=head2 sub IsZWJ()
 
 =head2 IsBOM()
 

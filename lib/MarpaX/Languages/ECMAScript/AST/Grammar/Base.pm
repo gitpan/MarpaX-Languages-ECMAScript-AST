@@ -11,7 +11,7 @@ use Carp qw/croak/;
 
 # ABSTRACT: ECMAScript, grammars base package
 
-our $VERSION = '0.001'; # TRIAL VERSION
+our $VERSION = '0.002'; # TRIAL VERSION
 
 #
 # Note: because this module is usually subclasses, internal methods are called
@@ -89,20 +89,20 @@ sub recce_option {
 
 
 sub _callback {
-  my ($self, $sourcep, $pos, $max, $impl, $callbackp, $originalErrorString, @args) = @_;
+  my ($self, $source, $pos, $max, $impl, $callbackp, $originalErrorString, @args) = @_;
 
   my $rc = $pos;
 
-  eval {$rc = &$callbackp(@args, $sourcep, $pos, $max, $impl)};
+  eval {$rc = &$callbackp(@args, $source, $pos, $max, $impl)};
   if ($@) {
     my $callackErrorString = $@;
     my $line_columnp;
     eval {$line_columnp = lineAndCol($impl)};
     if (! $@) {
       if (defined($originalErrorString) && $originalErrorString) {
-        logCroak("%s\n%s\n\n%s%s", $originalErrorString, $callackErrorString, showLineAndCol(@{$line_columnp}, $sourcep), _context($self, $impl));
+        logCroak("%s\n%s\n\n%s%s", $originalErrorString, $callackErrorString, showLineAndCol(@{$line_columnp}, $source), _context($self, $impl));
       } else {
-        logCroak("%s\n\n%s%s", $callackErrorString, showLineAndCol(@{$line_columnp}, $sourcep), _context($self, $impl));
+        logCroak("%s\n\n%s%s", $callackErrorString, showLineAndCol(@{$line_columnp}, $source), _context($self, $impl));
       }
     } else {
       if (defined($originalErrorString) && $originalErrorString) {
@@ -117,7 +117,7 @@ sub _callback {
 }
 
 sub parse {
-  my ($self, $sourcep, $impl, $optionsp, $start, $length) = @_;
+  my ($self, $source, $impl, $optionsp, $start, $length) = @_;
 
   $optionsp //= {};
   my $callbackp = $optionsp->{callback};
@@ -132,10 +132,13 @@ sub parse {
   $start //= 0;
   $length //= -1;
 
-  ${$sourcep} .= ' ';
+  #
+  # This will create a new instance of the string
+  #
+  $source .= ' ';
 
   my $pos = $start;
-  my $max = length(${$sourcep}) - $start + $length;
+  my $max = length($source) - $start + $length;
   my $stop;
   my $newpos;
   #
@@ -144,16 +147,16 @@ sub parse {
   #
   # Lexer can fail
   #
-  eval {$newpos = $impl->read($sourcep, $pos, $length)};
+  eval {$newpos = $impl->read(\$source, $pos, $length)};
   if ($@) {
     #
     # Failure callback
     #
     if (defined($failurep)) {
-      $pos = _callback($self, $sourcep, $pos, $max, $impl, $failurep, $@, @failureargs);
+      $pos = _callback($self, $source, $pos, $max, $impl, $failurep, $@, @failureargs);
     } else {
       my $line_columnp = lineAndCol($impl);
-      logCroak("%s\n\n%s%s", $@, showLineAndCol(@{$line_columnp}, $sourcep), _context($self, $impl));
+      logCroak("%s\n\n%s%s", $@, showLineAndCol(@{$line_columnp}, $source), _context($self, $impl));
     }
   } else {
     $pos = $newpos;
@@ -163,7 +166,7 @@ sub parse {
     # Events
     #
     if (defined($callbackp)) {
-      $pos = _callback($self, $sourcep, $pos, $max, $impl, $callbackp, undef, @callbackargs);
+      $pos = _callback($self, $source, $pos, $max, $impl, $callbackp, undef, @callbackargs);
     }
     #
     # Lexer can fail
@@ -174,10 +177,10 @@ sub parse {
         #
         # Failure callback
         #
-        $pos = _callback($self, $sourcep, $pos, $max, $impl, $failurep, $@, @failureargs);
+        $pos = _callback($self, $source, $pos, $max, $impl, $failurep, $@, @failureargs);
       } else {
         my $line_columnp = lineAndCol($impl);
-        logCroak("%s\n\n%s%s", $@, showLineAndCol(@{$line_columnp}, $sourcep), _context($self, $impl));
+        logCroak("%s\n\n%s%s", $@, showLineAndCol(@{$line_columnp}, $source), _context($self, $impl));
       }
     } else {
       $pos = $newpos;
@@ -188,7 +191,7 @@ sub parse {
     #
     # End callback
     #
-      _callback($self, $sourcep, $pos, $max, $impl, $endp, undef, @endargs);
+      _callback($self, $source, $pos, $max, $impl, $endp, undef, @endargs);
   }
 
   return $self;
@@ -205,7 +208,7 @@ sub value {
   if (defined($impl->value())) {
       croak "More than one parse tree value\n";
   }
-  return $rc;
+  return ${$rc};
 }
 
 # ----------------------------------------------------------------------------------------
@@ -256,9 +259,7 @@ sub getLastLexeme {
   #
   my ($start, $length) = lastLexemeSpan($impl);
   if (defined($start)) {
-    $lexemeHashp->{name} = undef;
     ($lexemeHashp->{start}, $lexemeHashp->{length}) = ($start, $length);
-    ($lexemeHashp->{line}, $lexemeHashp->{column}) = $impl->line_column($lexemeHashp->{start});
     $lexemeHashp->{value} = $impl->literal($lexemeHashp->{start}, $lexemeHashp->{length});
     $rc = 1;
   }
@@ -292,7 +293,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::Base - ECMAScript, grammars base pa
 
 =head1 VERSION
 
-version 0.001
+version 0.002
 
 =head1 SYNOPSIS
 
@@ -336,7 +337,7 @@ Returns recommended option for Marpa::R2::Scanless::G->new(), returned as a refe
 
 Returns recommended option for Marpa::R2::Scanless::R->new(), returned as a reference to a hash.
 
-=head2 parse($self, $sourcep, [$optionsp], [$start], [$length])
+=head2 parse($self, $source, [$optionsp], [$start], [$length])
 
 Parse the source given as reference to a scalar, an optional reference to a options that is a hash that can contain:
 
@@ -368,7 +369,7 @@ Reference to an array of End callback Code Reference first arguments
 
 =back
 
-This method must be called as a super method by grammar using this package as a parent. $self must be a reference to a grammar instantiated via MarpaX::Languages::ECMAScript::AST::Grammar. The callback code will always be called with: per-callback arguments, $sourcep, $pos (i.e. current position), $max (i.e. max position), $impl (i.e. a MarpaX::Languages::ECMAScript::AST::Impl instance). The default and failure callbacks must always return the new position in the stream, and croak if there is an error. In the 'end' and 'failure' callbacks, $pos is not meaningful: this is the last position where external scanning restarted. You might want to look to the getLastLexeme() method. Output of the 'end' callback is ignored.
+This method must be called as a super method by grammar using this package as a parent. $self must be a reference to a grammar instantiated via MarpaX::Languages::ECMAScript::AST::Grammar. The callback code will always be called with: per-callback arguments, $source, $pos (i.e. current position), $max (i.e. max position), $impl (i.e. a MarpaX::Languages::ECMAScript::AST::Impl instance). The default and failure callbacks must always return the new position in the stream, and croak if there is an error. In the 'end' and 'failure' callbacks, $pos is not meaningful: this is the last position where external scanning restarted. You might want to look to the getLastLexeme() method. Output of the 'end' callback is ignored.
 
 =head2 value($self, $impl)
 
@@ -414,10 +415,6 @@ Fills a hash with latest lexeme (whatever it is, its name is unknown):
 
 =over
 
-=item name
-
-undef value
-
 =item start
 
 Start position
@@ -425,14 +422,6 @@ Start position
 =item length
 
 Length
-
-=item line
-
-Line number as per Marpa
-
-=item column
-
-Column number as per Marpa
 
 =value
 

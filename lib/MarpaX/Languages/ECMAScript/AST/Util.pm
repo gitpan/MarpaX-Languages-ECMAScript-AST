@@ -12,7 +12,7 @@ use Carp qw/croak/;
 # Marpa follows Unicode recommendation, i.e. perl's \R, that cannot be in a character class
 our $NEWLINE_REGEXP = qr/(?>\x0D\x0A|\v)/;
 
-our $VERSION = '0.001'; # TRIAL VERSION
+our $VERSION = '0.002'; # TRIAL VERSION
 # CONTRIBUTORS
 
 our @EXPORT_OK = qw/whoami whowasi traceAndUnpack logCroak showLineAndCol lineAndCol lastCompleted startAndLength lastLexemeSpan/;
@@ -85,31 +85,31 @@ sub logCroak {
 
 
 sub showLineAndCol {
-    my ($line, $col, $sourcep) = @_;
+    my ($line, $col, $source) = @_;
 
     my $pointer = ($col > 0 ? '-' x ($col-1) : '') . '^';
     my $content = '';
 
-    my $prevpos = pos(${$sourcep});
-    pos(${$sourcep}) = undef;
+    my $prevpos = pos($source);
+    pos($source) = undef;
     my $thisline = 0;
     my $nbnewlines = 0;
     my $eos = 0;
-    while (${$sourcep} =~ m/\G(.*?)($NEWLINE_REGEXP|\Z)/scmg) {
+    while ($source =~ m/\G(.*?)($NEWLINE_REGEXP|\Z)/scmg) {
       if (++$thisline == $line) {
-        $content = substr(${$sourcep}, $-[1], $+[1] - $-[1]);
+        $content = substr($source, $-[1], $+[1] - $-[1]);
         $eos = (($+[2] - $-[2]) > 0) ? 0 : 1;
         last;
       }
     }
     $content =~ s/\t/ /g;
     if ($content) {
-      $nbnewlines = (substr(${$sourcep}, 0, pos(${$sourcep})) =~ tr/\n//);
+      $nbnewlines = (substr($source, 0, pos($source)) =~ tr/\n//);
       if ($eos) {
         ++$nbnewlines; # End of string instead of $NEWLINE_REGEXP
       }
     }
-    pos(${$sourcep}) = $prevpos;
+    pos($source) = $prevpos;
 
     return "line:column $line:$col (Unicode newline count) $nbnewlines:$col (\\n count)\n\n$content\n$pointer";
 }
@@ -159,7 +159,7 @@ MarpaX::Languages::ECMAScript::AST::Util - ECMAScript Translation to AST - Class
 
 =head1 VERSION
 
-version 0.001
+version 0.002
 
 =head1 SYNOPSIS
 
@@ -199,7 +199,7 @@ Returns a hash mapping @{$nameOfArgumentsp} to @arguments and trace it. The trac
 
 Formats a string using Log::Any, issue a $log->fatal with it, and croak with it.
 
-=head2 showLineAndCol($line, $col, $sourcep)
+=head2 showLineAndCol($line, $col, $source)
 
 Returns a string showing the request line, followed by another string that shows what is the column of interest, in the form "------^".
 

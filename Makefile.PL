@@ -20,8 +20,10 @@ my %WriteMakefileArgs = (
   "LICENSE" => "perl",
   "NAME" => "MarpaX::Languages::ECMAScript::AST",
   "PREREQ_PM" => {
+    "CHI" => 0,
     "Carp" => 0,
     "Data::Dumper" => 0,
+    "Digest::MD4" => 0,
     "Exporter" => 0,
     "Log::Any" => 0,
     "Marpa::R2" => "2.074",
@@ -42,7 +44,7 @@ my %WriteMakefileArgs = (
     "List::Util" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.001",
+  "VERSION" => "0.002",
   "test" => {
     "TESTS" => "t/*.t"
   }

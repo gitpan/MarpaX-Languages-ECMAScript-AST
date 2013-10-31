@@ -3,7 +3,7 @@ NAME
     AST
 
 VERSION
-    version 0.001
+    version 0.002
 
 SYNOPSIS
         use strict;
@@ -12,7 +12,6 @@ SYNOPSIS
         use Log::Log4perl qw/:easy/;
         use Log::Any::Adapter;
         use Log::Any qw/$log/;
-        use Data::Dumper;
         #
         # Init log
         #
@@ -28,7 +27,7 @@ SYNOPSIS
         #
         # Parse ECMAScript
         #
-        my $ecmaSourceCode = 'select * from myTable;';
+        my $ecmaSourceCode = 'var i = 0;';
         my $ecmaAstObject = MarpaX::Languages::ECMAScript::AST->new();
         $log->infof('%s', $ecmaAstObject->parse(\$ecmaSourceCode));
 
@@ -47,13 +46,20 @@ SUBROUTINES/METHODS
     grammarName
         Name of a grammar. Default is 'ECMAScript-262-5'.
 
-  parse($self, $sourcep)
-    Get and AST from the ECMAScript source, pointed by $sourcep. This method
+    cache
+        Produced AST can be cached: very often the same ECMAScript is used
+        again and again, so there is no need to always compute it at each
+        call. The cache is based on a key that the buffer MD4 checksum,
+        eventual collisions being handled. The cache location is the default
+        CHI::Driver::File location. Default is a true value.
+
+  parse($self, $source)
+    Get and AST from the ECMAScript source, pointed by $source. This method
     will call all the intermediary steps (lexical, transformation,
     evaluation) necessary to produce the AST.
 
 SEE ALSO
-    Log::Any, Marpa::R2
+    Log::Any, Marpa::R2, Digest::MD4, CHI::Driver::File
 
 SUPPORT
   Bugs / Feature Requests
