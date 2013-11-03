@@ -3,7 +3,7 @@ NAME
     AST
 
 VERSION
-    version 0.002
+    version 0.003
 
 SYNOPSIS
         use strict;
@@ -29,7 +29,7 @@ SYNOPSIS
         #
         my $ecmaSourceCode = 'var i = 0;';
         my $ecmaAstObject = MarpaX::Languages::ECMAScript::AST->new();
-        $log->infof('%s', $ecmaAstObject->parse(\$ecmaSourceCode));
+        $log->infof('%s', $ecmaAstObject->parse($ecmaSourceCode));
 
 DESCRIPTION
     This module translates ECMAScript source into an AST tree. To assist
@@ -49,9 +49,9 @@ SUBROUTINES/METHODS
     cache
         Produced AST can be cached: very often the same ECMAScript is used
         again and again, so there is no need to always compute it at each
-        call. The cache is based on a key that the buffer MD4 checksum,
-        eventual collisions being handled. The cache location is the default
-        CHI::Driver::File location. Default is a true value.
+        call. The cache key is the buffer MD4 checksum, eventual collisions
+        being handled. The cache location is the my_dist_data directory
+        provided by File::HomeDir package. Default is a true value.
 
   parse($self, $source)
     Get and AST from the ECMAScript source, pointed by $source. This method

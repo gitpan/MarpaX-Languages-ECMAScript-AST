@@ -21,7 +21,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical program grammar written in Marpa BNF
 
-our $VERSION = '0.002'; # TRIAL VERSION
+our $VERSION = '0.003'; # VERSION
 
 our $WhiteSpace        = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsWhiteSpace}])/;
 our $LineTerminator    = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsLineTerminator}])/;
@@ -165,6 +165,16 @@ sub _eventCallback {
 	if (exists($ReservedWord{$lastLexeme{value}})) {
 	    croak "[_eventCallback] Identifier $lastLexeme{value} is a reserved word";
 	}
+    }
+    elsif ($name eq '^INVISIBLE_SEMICOLON') {
+      #
+      # In the AST, we explicitely associate the ';' to the missing semicolon
+      #
+	my %lastLexeme = ();
+	$self->getLastLexeme(\%lastLexeme, $impl);
+	my $Slength = $self->_preSLength($source, $rc, $impl);
+	$self->_insertInvisibleSemiColon($impl, $rc, $Slength);
+	$rc += $Slength;
     }
     #
     # ^PLUSPLUS_POSTFIX, ^MINUSMINUS_POSTFIX
@@ -368,6 +378,16 @@ sub _insertSemiColon {
   }
 }
 
+sub _insertInvisibleSemiColon {
+  my ($self, $impl, $pos, $length) = @_;
+
+  #$log->tracef('[_insertInvisibleSemiColon] Automatic Invisible Semicolon Insertion at position %d, length %d', $pos, $length);
+  #$log->tracef('[_insertInvisibleSemiColon] lexeme_read(\'INVISIBLE_SEMICOLON\', %d, %d, \';\')', $pos, $length);
+  if (! $impl->lexeme_read('INVISIBLE_SEMICOLON', $pos, $length, ';')) {
+    croak "[_insertInvisibleSemiColon] Automatic Invisible Semicolon Insertion not allowed at position $pos";
+  }
+}
+
 sub _failureCallback {
   my ($self, $source, $pos, $max, $impl) = @_;
 
@@ -442,7 +462,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program - ECMAScr
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
 =head1 SYNOPSIS
 
@@ -514,13 +534,18 @@ Literal ::=
 #
 event 'NumericLiteral$' = completed <NumericLiteral>
 NumericLiteral ::=
-    DECIMALLITERAL           action => DecimalLiteral
-  | HEXINTEGERLITERAL        action => HexIntegerLiteral
-  | OCTALINTEGERLITERAL      action => OctalIntegerLiteral
+    DecimalLiteral
+  | HexIntegerLiteral
+  | OctalIntegerLiteral
+
+DecimalLiteral      ::= DECIMALLITERAL
+HexIntegerLiteral   ::= HEXINTEGERLITERAL
+OctalIntegerLiteral ::= OCTALINTEGERLITERAL
+Identifier          ::= IDENTIFIER
 
 PrimaryExpression ::=
     THIS
-  | IDENTIFIER
+  | Identifier
   | Literal
   | ArrayLiteral
   | ObjectLiteral
@@ -830,19 +855,16 @@ ContinueStatement ::=
     CONTINUE           SEMICOLON
   | CONTINUE INVISIBLE_SEMICOLON
   | CONTINUE IDENTIFIER           SEMICOLON
-#  | CONTINUE IDENTIFIER INVISIBLE_SEMICOLON
 
 BreakStatement ::=
     BREAK           SEMICOLON
   | BREAK INVISIBLE_SEMICOLON
   | BREAK IDENTIFIER           SEMICOLON
-#  | BREAK IDENTIFIER INVISIBLE_SEMICOLON
 
 ReturnStatement ::=
     RETURN           SEMICOLON
   | RETURN INVISIBLE_SEMICOLON
   | RETURN Expression           SEMICOLON
-#  | RETURN Expression INVISIBLE_SEMICOLON
 
 WithStatement ::=
     WITH  LPAREN  Expression  RPAREN  Statement
@@ -875,7 +897,6 @@ LabelledStatement ::=
 
 ThrowStatement ::=
       THROW Expression SEMICOLON
-#    | THROW Expression INVISIBLE_SEMICOLON
 
 TryStatement ::=
     TRY  Block  Catch
@@ -957,6 +978,7 @@ _S_ANY ~ _S*
 #   The subtility is that when INVISIBLE_SEMICOLON matches, we know per-def this is an automatic
 #   semicolon insertion: grammar expected a semicolon, and found it hidden.
 #
+:lexeme ~ <INVISIBLE_SEMICOLON> pause => before event => '^INVISIBLE_SEMICOLON'
 INVISIBLE_SEMICOLON ~ _S_ANY _SLT _S_ANY
 
 NullLiteral                           ::= NULL

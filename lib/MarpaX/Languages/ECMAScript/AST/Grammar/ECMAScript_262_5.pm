@@ -7,7 +7,7 @@ use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program;
 
 # ABSTRACT: ECMAScript-262, Edition 5, grammar
 
-our $VERSION = '0.002'; # TRIAL VERSION
+our $VERSION = '0.003'; # VERSION
 
 
 sub new {
@@ -58,7 +58,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5 - ECMAScript-262, 
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
 =head1 SYNOPSIS
 

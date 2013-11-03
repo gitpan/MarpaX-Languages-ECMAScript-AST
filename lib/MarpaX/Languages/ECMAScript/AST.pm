@@ -9,11 +9,18 @@ use Carp qw/croak/;
 use MarpaX::Languages::ECMAScript::AST::Grammar qw//;
 use Digest::MD4 qw/md4_hex/;
 use CHI;
+use File::HomeDir;
+
+our $distname = __PACKAGE__;
+$distname =~ s/::/-/g;
 
 our $cache = CHI->new(driver => 'File',
+                      root_dir => File::HomeDir->my_dist_data($distname, { create => 1 } ),
+                      label => __PACKAGE__,
+                      namespace => 'cache',
 		      max_key_length => 32);
 
-our $VERSION = '0.002'; # TRIAL VERSION
+our $VERSION = '0.003'; # VERSION
 
 
 # ----------------------------------------------------------------------------------------
@@ -82,7 +89,7 @@ MarpaX::Languages::ECMAScript::AST - Translate a ECMAScript source to an AST
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
 =head1 SYNOPSIS
 
@@ -109,7 +116,7 @@ version 0.002
     #
     my $ecmaSourceCode = 'var i = 0;';
     my $ecmaAstObject = MarpaX::Languages::ECMAScript::AST->new();
-    $log->infof('%s', $ecmaAstObject->parse(\$ecmaSourceCode));
+    $log->infof('%s', $ecmaAstObject->parse($ecmaSourceCode));
 
 =head1 DESCRIPTION
 
@@ -129,7 +136,7 @@ Name of a grammar. Default is 'ECMAScript-262-5'.
 
 =item cache
 
-Produced AST can be cached: very often the same ECMAScript is used again and again, so there is no need to always compute it at each call. The cache is based on a key that the buffer MD4 checksum, eventual collisions being handled. The cache location is the default CHI::Driver::File location. Default is a true value.
+Produced AST can be cached: very often the same ECMAScript is used again and again, so there is no need to always compute it at each call. The cache key is the buffer MD4 checksum, eventual collisions being handled. The cache location is the my_dist_data directory provided by File::HomeDir package. Default is a true value.
 
 =back
 

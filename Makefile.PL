@@ -25,6 +25,7 @@ my %WriteMakefileArgs = (
     "Data::Dumper" => 0,
     "Digest::MD4" => 0,
     "Exporter" => 0,
+    "File::HomeDir" => 0,
     "Log::Any" => 0,
     "Marpa::R2" => "2.074",
     "SUPER" => 0,
@@ -44,7 +45,7 @@ my %WriteMakefileArgs = (
     "List::Util" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.002",
+  "VERSION" => "0.003",
   "test" => {
     "TESTS" => "t/*.t"
   }

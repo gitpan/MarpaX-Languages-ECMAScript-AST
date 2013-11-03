@@ -8,7 +8,7 @@ package MarpaX::Languages::ECMAScript::AST::Grammar;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5;
 use Carp qw/croak/;
 
-our $VERSION = '0.002'; # TRIAL VERSION
+our $VERSION = '0.003'; # VERSION
 
 
 sub new {
@@ -49,7 +49,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar - ECMAScript grammar written in Marp
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
 =head1 SYNOPSIS
 

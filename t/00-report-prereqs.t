@@ -16,6 +16,7 @@ my @modules = qw(
   Digest::MD4
   Exporter
   ExtUtils::MakeMaker
+  File::HomeDir
   File::Spec
   File::Spec::Functions
   File::Temp

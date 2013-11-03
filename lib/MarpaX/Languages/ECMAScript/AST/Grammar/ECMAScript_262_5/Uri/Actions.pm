@@ -5,7 +5,7 @@ package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Uri::Acti
 
 # ABSTRACT: ECMAScript 262, Edition 5, grammar actions
 
-our $VERSION = '0.002'; # TRIAL VERSION
+our $VERSION = '0.003'; # VERSION
 
 
 
@@ -30,7 +30,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Uri::Actions - EC
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
 =head1 DESCRIPTION
 
