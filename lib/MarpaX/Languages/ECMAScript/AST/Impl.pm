@@ -9,7 +9,7 @@ use Marpa::R2 2.074;
 use Carp qw/croak/;
 use MarpaX::Languages::ECMAScript::AST::Impl::Logger;
 
-our $VERSION = '0.003'; # VERSION
+our $VERSION = '0.004'; # VERSION
 
 our $MARPA_TRACE_FILE_HANDLE;
 our $MARPA_TRACE_BUFFER;
@@ -161,6 +161,16 @@ sub recce {
 }
 
 
+sub g1_rule_ids {
+  return $_[0]->{grammar}->g1_rule_ids();
+}
+
+
+sub rule {
+  return $_[0]->{grammar}->rule(@_[1..$#_]);
+}
+
+
 1;
 
 __END__
@@ -175,7 +185,7 @@ MarpaX::Languages::ECMAScript::AST::Impl - Implementation of Marpa's interface
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 SYNOPSIS
 
@@ -278,6 +288,14 @@ Returns a Marpa::R2::Scanless::G object of this grammar.
 =head2 recce($self)
 
 Returns a Marpa::R2::Scanless::R object of this grammar.
+
+=head2 g1_rule_ids($self)
+
+Returns Marpa's grammar's g1_rule_ids.
+
+=head2 rule($self)
+
+Returns Marpa's grammar's rule.
 
 =head1 SEE ALSO
 

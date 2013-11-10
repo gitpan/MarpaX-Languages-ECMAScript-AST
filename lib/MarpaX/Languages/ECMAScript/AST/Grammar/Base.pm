@@ -11,7 +11,7 @@ use Carp qw/croak/;
 
 # ABSTRACT: ECMAScript, grammars base package
 
-our $VERSION = '0.003'; # VERSION
+our $VERSION = '0.004'; # VERSION
 
 #
 # Note: because this module is usually subclasses, internal methods are called
@@ -293,7 +293,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::Base - ECMAScript, grammars base pa
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 SYNOPSIS
 
@@ -401,7 +401,7 @@ Line number as per Marpa
 
 Column number as per Marpa
 
-=value
+=item value
 
 Lexeme value
 
@@ -423,7 +423,7 @@ Start position
 
 Length
 
-=value
+=item value
 
 Lexeme value
 

@@ -3,7 +3,7 @@ use warnings;
 
 # this test was generated with Dist::Zilla::Plugin::Test::Compile 2.033
 
-use Test::More  tests => 24 + ($ENV{AUTHOR_TESTING} ? 1 : 0);
+use Test::More  tests => 25 + ($ENV{AUTHOR_TESTING} ? 1 : 0);
 
 
 
@@ -27,6 +27,7 @@ my @module_files = (
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Pattern/Actions.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Program.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Program/Actions.pm',
+    'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Template.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Uri.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Uri/Actions.pm',
     'MarpaX/Languages/ECMAScript/AST/Impl.pm',

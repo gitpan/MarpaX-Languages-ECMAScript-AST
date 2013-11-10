@@ -6,7 +6,7 @@ use MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses qw/:all/;
 
 # ABSTRACT: ECMAScript-262, Edition 5, character classes
 
-our $VERSION = '0.003'; # VERSION
+our $VERSION = '0.004'; # VERSION
 
 
 1;
@@ -23,7 +23,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses 
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 SYNOPSIS
 

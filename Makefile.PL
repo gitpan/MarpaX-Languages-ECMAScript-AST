@@ -25,14 +25,18 @@ my %WriteMakefileArgs = (
     "Data::Dumper" => 0,
     "Digest::MD4" => 0,
     "Exporter" => 0,
+    "File::Basename" => 0,
     "File::HomeDir" => 0,
+    "File::Spec" => 0,
     "Log::Any" => 0,
     "Marpa::R2" => "2.074",
+    "Module::Util" => 0,
     "SUPER" => 0,
     "constant" => 0,
     "diagnostics" => 0,
     "parent" => 0,
     "strict" => 0,
+    "version" => "0.77",
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
@@ -45,7 +49,7 @@ my %WriteMakefileArgs = (
     "List::Util" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.003",
+  "VERSION" => "0.004",
   "test" => {
     "TESTS" => "t/*.t"
   }

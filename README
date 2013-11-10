@@ -3,7 +3,7 @@ NAME
     AST
 
 VERSION
-    version 0.003
+    version 0.004
 
 SYNOPSIS
         use strict;
@@ -51,12 +51,31 @@ SUBROUTINES/METHODS
         again and again, so there is no need to always compute it at each
         call. The cache key is the buffer MD4 checksum, eventual collisions
         being handled. The cache location is the my_dist_data directory
-        provided by File::HomeDir package. Default is a true value.
+        provided by File::HomeDir package. Default is a false value.
+
+  describe($self)
+    Get a description of the G1 grammar. Returns a reference to hash, that
+    has this structure: key => value, where
+
+    key 'G1' or 'G0', with value being a reference to all rules, LHS being
+        the first.
+
+  grammarAlias($self)
+    Returns the grammar alias, i.e. the one that is used within this
+    distribution, corresponding to a true directory on the filesystem.
+
+  templatePath($self)
+    Returns the templates absolute path.
 
   parse($self, $source)
     Get and AST from the ECMAScript source, pointed by $source. This method
     will call all the intermediary steps (lexical, transformation,
     evaluation) necessary to produce the AST.
+
+  template($self)
+    Return the generic template for this grammar. This template is doing
+    nothing else but reproduce an ECMAScript source that, if parsed, would
+    have an AST similar to the original source.
 
 SEE ALSO
     Log::Any, Marpa::R2, Digest::MD4, CHI::Driver::File

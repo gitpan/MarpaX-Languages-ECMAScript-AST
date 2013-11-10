@@ -5,10 +5,9 @@ package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical expressions grammar actions
 
-our $VERSION = '0.003'; # VERSION
+our $VERSION = '0.004'; # VERSION
 
 use constant AST => 'MarpaX::Languages::ECMAScript::AST';
-
 
 
 sub new {
@@ -16,6 +15,17 @@ sub new {
     my $self = {};
     bless($self, $class);
     return $self;
+}
+
+
+sub valuesAndRuleId {
+  my $self = shift;
+
+  #
+  # Note: we do not include Marpa explicitely: this is done in one unique
+  # place, i.e. Impl.pm.
+  #
+  return {values => [ @_ ], ruleId => $Marpa::R2::Context::rule};
 }
 
 1;
@@ -32,15 +42,33 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Actions 
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 DESCRIPTION
 
 This modules give the actions associated to ECMAScript_262_5 lexical expressions grammar.
 
+=head1 SUBROUTINES/METHODS
+
 =head2 new($class)
 
 Instantiate a new object.
+
+=head2 valuesAndRuleId($self, @values)
+
+Default G1 action: a hash with the following keys:
+
+=over
+
+=item ruleId
+
+G1 rule Id
+
+=item values
+
+Reference to an array containing the values
+
+=back
 
 =head1 AUTHOR
 

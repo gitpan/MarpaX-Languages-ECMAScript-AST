@@ -25,11 +25,14 @@ lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/StringLiter
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Pattern/Actions.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Program.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Program/Actions.pm
+lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Template.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Uri.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Uri/Actions.pm
 lib/MarpaX/Languages/ECMAScript/AST/Impl.pm
 lib/MarpaX/Languages/ECMAScript/AST/Impl/Logger.pm
 lib/MarpaX/Languages/ECMAScript/AST/Util.pm
+perlcritic.rc
+script/generateTemplate.pl
 t/00-compile.t
 t/00-report-prereqs.t
 t/asi.t

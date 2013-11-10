@@ -8,7 +8,7 @@ package MarpaX::Languages::ECMAScript::AST::Grammar;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5;
 use Carp qw/croak/;
 
-our $VERSION = '0.003'; # VERSION
+our $VERSION = '0.004'; # VERSION
 
 
 sub new {
@@ -19,6 +19,7 @@ sub new {
   if (! defined($grammarName)) {
     croak 'Usage: new($grammar_Name)';
   } elsif ($grammarName eq 'ECMAScript-262-5') {
+    $self->{_grammarAlias} = 'ECMAScript_262_5';
     $self->{_grammar} = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5->new(@_);
   } else {
     croak "Unsupported grammar name $grammarName";
@@ -32,6 +33,18 @@ sub new {
 sub program {
     my ($self) = @_;
     return $self->{_grammar}->program();
+}
+
+
+sub grammarAlias {
+    my ($self) = @_;
+    return $self->{_grammarAlias};
+}
+
+
+sub template {
+    my ($self) = @_;
+    return $self->{_grammar}->template();
 }
 
 
@@ -49,7 +62,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar - ECMAScript grammar written in Marp
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 SYNOPSIS
 
@@ -98,6 +111,14 @@ A MarpaX::Languages::ECMAScript::AST::Grammar::Base object
 A MarpaX::Languages::ECMAScript::AST::Impl object
 
 =back
+
+=head2 grammarAlias($self)
+
+Returns the grammar alias, i.e. the one really used in this distribution.
+
+=head2 template($self)
+
+Returns the generic template associated to grammarName.
 
 =head1 SEE ALSO
 

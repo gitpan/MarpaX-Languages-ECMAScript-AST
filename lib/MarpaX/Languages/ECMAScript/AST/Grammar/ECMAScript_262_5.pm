@@ -4,10 +4,11 @@ use warnings FATAL => 'all';
 package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5;
 use MarpaX::Languages::ECMAScript::AST::Impl;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program;
+our $TEMPLATE = eval 'use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Template; 1;' || 0;
 
 # ABSTRACT: ECMAScript-262, Edition 5, grammar
 
-our $VERSION = '0.003'; # VERSION
+our $VERSION = '0.004'; # VERSION
 
 
 sub new {
@@ -34,6 +35,7 @@ sub _init {
 	grammar => $grammar,
 	impl => MarpaX::Languages::ECMAScript::AST::Impl->new($grammar_option, $recce_option)
     };
+    $self->{_template} = $TEMPLATE ? MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Template->new() : undef;
 
 }
 
@@ -42,6 +44,13 @@ sub program {
     my ($self) = @_;
 
     return $self->{_program};
+}
+
+
+sub template {
+    my ($self) = @_;
+
+    return $self->{_template};
 }
 
 1;
@@ -58,7 +67,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5 - ECMAScript-262, 
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 SYNOPSIS
 
@@ -95,6 +104,10 @@ A MarpaX::Languages::ECMAScript::AST::Grammar::Base object
 A MarpaX::Languages::ECMAScript::AST::Impl object
 
 =back
+
+=head2 template()
+
+Returns the template associated to this grammar. This is a MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Template object.
 
 =head1 AUTHOR
 

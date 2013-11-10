@@ -10,7 +10,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical numeric grammar written in Marpa BNF
 
-our $VERSION = '0.003'; # VERSION
+our $VERSION = '0.004'; # VERSION
 
 
 
@@ -58,7 +58,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::NumericL
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 SYNOPSIS
 

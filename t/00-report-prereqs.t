@@ -16,6 +16,7 @@ my @modules = qw(
   Digest::MD4
   Exporter
   ExtUtils::MakeMaker
+  File::Basename
   File::HomeDir
   File::Spec
   File::Spec::Functions
@@ -25,6 +26,7 @@ my @modules = qw(
   List::Util
   Log::Any
   Marpa::R2
+  Module::Util
   SUPER
   Test::More
   constant
@@ -32,6 +34,7 @@ my @modules = qw(
   parent
   perl
   strict
+  version
   warnings
 );
 

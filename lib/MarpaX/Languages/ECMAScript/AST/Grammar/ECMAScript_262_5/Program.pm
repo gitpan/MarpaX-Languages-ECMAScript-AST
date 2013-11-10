@@ -21,7 +21,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical program grammar written in Marpa BNF
 
-our $VERSION = '0.003'; # VERSION
+our $VERSION = '0.004'; # VERSION
 
 our $WhiteSpace        = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsWhiteSpace}])/;
 our $LineTerminator    = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsLineTerminator}])/;
@@ -462,7 +462,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program - ECMAScr
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 SYNOPSIS
 
@@ -516,7 +516,7 @@ __DATA__
 # tokens, line terminators, comments, or white space.
 #
 :start ::= Program
-:default ::= action => [values] bless => ::lhs
+:default ::= action => valuesAndRuleId # bless => ::lhs
 lexeme default = action => [start,length,value]
 
 #
@@ -534,18 +534,13 @@ Literal ::=
 #
 event 'NumericLiteral$' = completed <NumericLiteral>
 NumericLiteral ::=
-    DecimalLiteral
-  | HexIntegerLiteral
-  | OctalIntegerLiteral
-
-DecimalLiteral      ::= DECIMALLITERAL
-HexIntegerLiteral   ::= HEXINTEGERLITERAL
-OctalIntegerLiteral ::= OCTALINTEGERLITERAL
-Identifier          ::= IDENTIFIER
+    DECIMALLITERAL
+  | HEXINTEGERLITERAL
+  | OCTALINTEGERLITERAL
 
 PrimaryExpression ::=
     THIS
-  | Identifier
+  | IDENTIFIER
   | Literal
   | ArrayLiteral
   | ObjectLiteral
