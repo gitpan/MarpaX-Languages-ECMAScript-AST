@@ -8,14 +8,13 @@ package MarpaX::Languages::ECMAScript::AST::Util;
 use Exporter 'import';
 use Log::Any qw/$log/;
 use Data::Dumper;
-use Carp qw/croak/;
 # Marpa follows Unicode recommendation, i.e. perl's \R, that cannot be in a character class
 our $NEWLINE_REGEXP = qr/(?>\x0D\x0A|\v)/;
 
-our $VERSION = '0.004'; # VERSION
+our $VERSION = '0.005'; # VERSION
 # CONTRIBUTORS
 
-our @EXPORT_OK = qw/whoami whowasi traceAndUnpack logCroak showLineAndCol lineAndCol lastCompleted startAndLength lastLexemeSpan/;
+our @EXPORT_OK = qw/whoami whowasi traceAndUnpack showLineAndCol lineAndCol lastCompleted startAndLength lastLexemeSpan/;
 our %EXPORT_TAGS = ('all' => [ @EXPORT_OK ]);
 
 
@@ -62,25 +61,6 @@ sub traceAndUnpack {
     $whowasi =~ s/^MarpaX::Languages::ECMAScript::AST:://;
     $log->tracef('%s(%s)', $whowasi, join(', ', @string));
     return($rc);
-}
-
-
-sub logCroak {
-    my ($fmt, @arg) = @_;
-
-    my $msg = sprintf($fmt, @arg);
-    $log->fatalf($msg);
-    if (! $log->is_fatal()) {
-      #
-      # Logging is not enabled at FATAL level: re do the message in croak
-      #
-      croak $msg;
-    } else {
-      #
-      # Logging is enabled at FATAL level: no new message
-      #
-      croak;
-    }
 }
 
 
@@ -159,7 +139,7 @@ MarpaX::Languages::ECMAScript::AST::Util - ECMAScript Translation to AST - Class
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 
@@ -194,10 +174,6 @@ Returns the name of the parent's calling routine. Optional $base prefix is remov
 =head2 traceAndUnpack($nameOfArgumentsp, @arguments)
 
 Returns a hash mapping @{$nameOfArgumentsp} to @arguments and trace it. The tracing is done using a method quite similar to Log::Any. Tracing and hash mapping stops at the end of @nameOfArguments or @arguments.
-
-=head2 logCroak($fmt, @arg)
-
-Formats a string using Log::Any, issue a $log->fatal with it, and croak with it.
 
 =head2 showLineAndCol($line, $col, $source)
 

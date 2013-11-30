@@ -6,23 +6,22 @@ package MarpaX::Languages::ECMAScript::AST::Grammar;
 # ABSTRACT: ECMAScript grammar written in Marpa BNF
 
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5;
-use Carp qw/croak/;
+use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 
-our $VERSION = '0.004'; # VERSION
+our $VERSION = '0.005'; # VERSION
 
 
 sub new {
-  my $class = shift;
-  my $grammarName = shift;
+  my ($class, $grammarName, %grammarSpecificOptions) = @_;
 
   my $self = {};
   if (! defined($grammarName)) {
-    croak 'Usage: new($grammar_Name)';
+    InternalError(error => 'Usage: new($grammar_Name)');
   } elsif ($grammarName eq 'ECMAScript-262-5') {
     $self->{_grammarAlias} = 'ECMAScript_262_5';
-    $self->{_grammar} = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5->new(@_);
+    $self->{_grammar} = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5->new(%grammarSpecificOptions);
   } else {
-    croak "Unsupported grammar name $grammarName";
+    InternalError(error => "Unsupported grammar name $grammarName");
   }
   bless($self, $class);
 
@@ -62,7 +61,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar - ECMAScript grammar written in Marp
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 
@@ -84,7 +83,7 @@ ECMAScript-262-5. The ECMAScript-262, Edition 5, as of L<http://www.ecma-interna
 
 =head1 SUBROUTINES/METHODS
 
-=head2 new($class, $grammarName)
+=head2 new($class, $grammarName, %grammarSpecificOptions)
 
 Instance a new object. Takes the name of the grammar as argument. Remaining arguments are passed to the sub grammar method. Supported grammars are:
 

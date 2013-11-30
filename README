@@ -3,7 +3,7 @@ NAME
     AST
 
 VERSION
-    version 0.004
+    version 0.005
 
 SYNOPSIS
         use strict;
@@ -97,6 +97,9 @@ SUPPORT
 
 AUTHOR
     Jean-Damien Durand <jeandamiendurand@free.fr>
+
+CONTRIBUTOR
+    jddurand <jeandamiendurand@free.fr>
 
 COPYRIGHT AND LICENSE
     This software is copyright (c) 2013 by Jean-Damien Durand.

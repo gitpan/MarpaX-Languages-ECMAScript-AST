@@ -13,7 +13,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical grammar written in Marpa BNF
 
-our $VERSION = '0.004'; # VERSION
+our $VERSION = '0.005'; # VERSION
 
 
 our @FutureReservedWordStrict = qw/
@@ -141,7 +141,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical - ECMAScr
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 

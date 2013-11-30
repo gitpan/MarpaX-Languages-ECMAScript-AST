@@ -10,7 +10,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical numeric grammar written in Marpa BNF
 
-our $VERSION = '0.004'; # VERSION
+our $VERSION = '0.005'; # VERSION
 
 
 
@@ -19,7 +19,7 @@ sub new {
 
     #
     # Prevent injection of this grammar to collide with others:
-    # ___yy is changed to ___StringLiteral___yy
+    # ___yy is changed to ___NumericLiteral___yy
     #
     my $grammar_source = do {local $/; <DATA>};
     $grammar_source =~ s/___/___NumericLiteral___/g;
@@ -32,17 +32,8 @@ sub parse {
     my ($self, $source, $impl) = @_;
     return $self->SUPER($source, $impl,
 	{
-	 #   '_DecimalLiteral$'     => \&_DecimalLiteral,
-	 #   '_HexIntegerLiteral$'  => \&_HexIntegerLiteral,
-	 #   '_OctalIntegerLiteral$'=> \&_OctalIntegerLiteral,
-	 #   '_IdentifierName$'     => \&_IdentifierName
+	    keepOriginalSource => 1
 	});
-}
-
-sub _DecimalLiteral {
-    my ($self, $lexemeHashp, $source, $impl) = @_;
-
-    $self->_NumericLiteralLookhead($lexemeHashp, $source, $impl);
 }
 
 
@@ -58,7 +49,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::NumericL
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 
@@ -127,39 +118,53 @@ __NumericLiteral ::=
 # action => xxx              are removed
 # __xxx\s*::=\s*               are changed to __xxx ~
 #
+# Actions: it appears that NumericLiteral semantic is 100% compatible with perl's semantic.
+# So, to compute the MV of a NumericLiteral, there is no need to go in deep detail, just doing
+# conversion at the very end of the string. This is why DecimalLiteral, HexIntegerLiteral and
+# OctalIntegerLiteral are explicitely exported in grammar injection.
+#
 
-__DecimalDigitsopt ::= __DecimalDigits
-__DecimalDigitsopt ::=
+__DecimalLiteral ::=
+  __DecimalIntegerLiteral '.'
+  | __DecimalIntegerLiteral '.' __DecimalDigits
+  | __DecimalIntegerLiteral '.' __DecimalDigits __ExponentPart
+  | __DecimalIntegerLiteral '.' __ExponentPart
+  | '.' __DecimalDigits
+  | '.' __DecimalDigits __ExponentPart
+  | __DecimalIntegerLiteral
+  | __DecimalIntegerLiteral __ExponentPart
 
-__ExponentPartopt ::= __ExponentPart
-__ExponentPartopt ::=
+__DecimalIntegerLiteral ::=
+    '0'
+  | ___NonZeroDigit
+  | ___NonZeroDigit __DecimalDigits
 
-__DecimalLiteral ::= __DecimalIntegerLiteral '.' __DecimalDigitsopt __ExponentPartopt
-                 | '.' __DecimalDigits __ExponentPartopt
-                 | __DecimalIntegerLiteral __ExponentPartopt
+__DecimalDigits ::=
+    ___DecimalDigit
+  | __DecimalDigits ___DecimalDigit
 
-__DecimalIntegerLiteral ::= '0'
-                        | ___NonZeroDigit __DecimalDigitsopt
+__ExponentPart ::=
+    ___ExponentIndicator __SignedInteger
 
-__DecimalDigits ::= ___DecimalDigit
-                | __DecimalDigits ___DecimalDigit
+__SignedInteger ::=
+    __DecimalDigits
+  | '+' __DecimalDigits
+  | '-' __DecimalDigits
 
-__ExponentPart ::= ___ExponentIndicator __SignedInteger
+__HexIntegerLiteral ::=
+    __HexIntegerLiteralInternal
 
-__SignedInteger ::= __DecimalDigits
-                | '+' __DecimalDigits
-                | '-' __DecimalDigits
+__HexIntegerLiteralInternal ::=
+    '0x' ___HexDigit
+  | '0X' ___HexDigit
+  | __HexIntegerLiteralInternal ___HexDigit
 
-__HexIntegerLiteral ::= __HexIntegerLiteralInternal
+__OctalIntegerLiteral ::=
+    __OctalIntegerLiteralInternal
 
-__HexIntegerLiteralInternal ::= '0x' ___HexDigit
-                    | '0X' ___HexDigit
-                    | __HexIntegerLiteralInternal ___HexDigit
-
-__OctalIntegerLiteral ::= __OctalIntegerLiteralInternal
-
-__OctalIntegerLiteralInternal ::= '0' ___OctalDigit
-                                | __OctalIntegerLiteralInternal ___OctalDigit
+__OctalIntegerLiteralInternal ::=
+    '0' ___OctalDigit
+  | __OctalIntegerLiteralInternal ___OctalDigit
 
 #
 # The ___ are to prevent errors with eventual duplicate rules when injecting

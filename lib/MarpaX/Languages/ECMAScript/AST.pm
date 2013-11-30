@@ -5,7 +5,6 @@ package MarpaX::Languages::ECMAScript::AST;
 
 # ABSTRACT: Translate a ECMAScript source to an AST
 
-use Carp qw/croak/;
 use MarpaX::Languages::ECMAScript::AST::Grammar qw//;
 use Digest::MD4 qw/md4_hex/;
 use CHI;
@@ -25,7 +24,7 @@ our $CACHE = CHI->new(driver => 'File',
                       namespace => 'cache',
 		      max_key_length => 32);
 
-our $VERSION = '0.004'; # VERSION
+our $VERSION = '0.005'; # VERSION
 our $CURRENTVERSION;
 {
   #
@@ -50,15 +49,22 @@ sub new {
 
   bless($self, $class);
 
-  $self->_init();
+  if (exists($opts{grammarName})) {
+      delete($opts{grammarName});
+  }
+  if (exists($opts{cache})) {
+      delete($opts{cache});
+  }
+
+  $self->_init(%opts);
 
   return $self;
 }
 
 sub _init {
-    my ($self) = @_;
+    my ($self, %opts) = @_;
 
-    $self->{_grammar} = MarpaX::Languages::ECMAScript::AST::Grammar->new($self->{_grammarName});
+    $self->{_grammar} = MarpaX::Languages::ECMAScript::AST::Grammar->new($self->{_grammarName}, %opts);
 }
 
 # ----------------------------------------------------------------------------------------
@@ -69,12 +75,12 @@ sub describe {
 
     my $impl = $self->{_grammar}->program->{impl};
     my %g0 = ();
-    foreach ($impl->g1_rule_ids('G0')) {
-      $g0{$_} = [ $impl->rule($_) ];
+    foreach ($impl->rule_ids('G0')) {
+      $g0{$_} = [ map {$impl->symbol_name($_, 'G0')} $impl->rule_expand($_, 'G0') ];
     }
     my %g1 = ();
-    foreach ($impl->g1_rule_ids('G1')) {
-      $g1{$_} = [ $impl->rule($_) ];
+    foreach ($impl->rule_ids('G1')) {
+      $g1{$_} = [ map {$impl->symbol_name($_, 'G1')} $impl->rule_expand($_, 'G1') ];
     }
 
     return { G0 => \%g0, G1 => \%g1 };
@@ -233,7 +239,7 @@ MarpaX::Languages::ECMAScript::AST - Translate a ECMAScript source to an AST
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 
@@ -338,6 +344,10 @@ L<https://github.com/jddurand/marpax-languages-ecmascript-ast>
 =head1 AUTHOR
 
 Jean-Damien Durand <jeandamiendurand@free.fr>
+
+=head1 CONTRIBUTOR
+
+jddurand <jeandamiendurand@free.fr>
 
 =head1 COPYRIGHT AND LICENSE
 

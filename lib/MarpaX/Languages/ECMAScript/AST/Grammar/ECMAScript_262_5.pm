@@ -8,34 +8,30 @@ our $TEMPLATE = eval 'use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScrip
 
 # ABSTRACT: ECMAScript-262, Edition 5, grammar
 
-our $VERSION = '0.004'; # VERSION
+our $VERSION = '0.005'; # VERSION
 
 
 sub new {
-  my ($class) = @_;
+  my ($class, %transpileOptions) = @_;
 
   my $self  = {};
 
   bless($self, $class);
 
-  $self->_init();
+  $self->_init(%transpileOptions);
 
   return $self;
 }
 
 sub _init {
-    my ($self) = @_;
+    my ($self, %transpileOptions) = @_;
 
-    my $grammar = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program->new();
-    my $grammar_option = $grammar->grammar_option();
-    $grammar_option->{bless_package} = 'ECMAScript_262_5::AST';
-    $grammar_option->{source} = \$grammar->content();
-    my $recce_option = $grammar->recce_option();
+    my $program = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program->new();
     $self->{_program} = {
-	grammar => $grammar,
-	impl => MarpaX::Languages::ECMAScript::AST::Impl->new($grammar_option, $recce_option)
+	grammar => $program,
+	impl => MarpaX::Languages::ECMAScript::AST::Impl->new($program->grammar_option(), $program->recce_option())
     };
-    $self->{_template} = $TEMPLATE ? MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Template->new() : undef;
+    $self->{_template} = $TEMPLATE ? MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Template->new(%transpileOptions) : undef;
 
 }
 
@@ -67,7 +63,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5 - ECMAScript-262, 
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 
@@ -85,7 +81,7 @@ This modules returns all grammars needed for the ECMAScript 262, Edition 5 gramm
 
 =head1 SUBROUTINES/METHODS
 
-=head2 new()
+=head2 new($class, %transpileOptions)
 
 Instance a new object.
 

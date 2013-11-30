@@ -5,12 +5,12 @@ package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical decimal grammar actions
 
-our $VERSION = '0.004'; # VERSION
+our $VERSION = '0.005'; # VERSION
 
 
 
 sub new {
-    my $class = shift;
+    my ($class) = @_;
     my $self = {};
     bless($self, $class);
     return $self;
@@ -30,7 +30,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::NumericL
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 DESCRIPTION
 

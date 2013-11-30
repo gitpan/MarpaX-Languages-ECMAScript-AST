@@ -14,14 +14,15 @@ use parent qw/MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Bas
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Actions;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::RegularExpressionLiteral;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral;
+use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::NumericLiteral;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses;
-use Carp qw/croak/;
+use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 use Log::Any qw/$log/;
 use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical program grammar written in Marpa BNF
 
-our $VERSION = '0.004'; # VERSION
+our $VERSION = '0.005'; # VERSION
 
 our $WhiteSpace        = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsWhiteSpace}])/;
 our $LineTerminator    = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsLineTerminator}])/;
@@ -88,7 +89,9 @@ map {$grammar_source .= uc($_) . " ~ '$_'\n"} @BooleanLiteral;
 #
 our $StringLiteral = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral->new();
 our $RegularExpressionLiteral = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::RegularExpressionLiteral->new();
+our $NumericLiteral = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::NumericLiteral->new();
 $grammar_source .= $StringLiteral->extract;
+$grammar_source .= $NumericLiteral->extract;
 $grammar_source .= $RegularExpressionLiteral->extract;
 
 
@@ -120,6 +123,7 @@ sub parse {
                          failureargs => [ $self ],
                          end => \&_endCallback,
                          endargs => [ $self ],
+			 keepOriginalSource => 0,
                         });
 }
 
@@ -136,7 +140,9 @@ sub _eventCallback {
     #
     # Events are always in this order:
     #
+    # ---------------------------------
     # 1. Completion events first (XXX$)
+    # ---------------------------------
     #
     if ($name eq 'Program$') {
 	#
@@ -153,19 +159,25 @@ sub _eventCallback {
           $self->_isDecimalDigit($source, $pos, $impl)) {
         my ($start, $end) = $impl->last_completed_range('NumericLiteral');
         my $lastNumericLiteral = $impl->range_to_string($start, $end);
-        croak "[_eventCallback] NumericLiteral $lastNumericLiteral must not be immediately followed by an IdentifierStart or DecimalDigit";
+        SyntaxError(error => "NumericLiteral $lastNumericLiteral must not be immediately followed by an IdentifierStart or DecimalDigit");
       }
     }
-    # 2. Then nulled events (XXX[])
-    # 3. Then prediction events (^XXX or ^^XXX)
-    #
     elsif ($name eq 'IDENTIFIER$') {
 	my %lastLexeme = ();
 	$self->getLastLexeme(\%lastLexeme, $impl);
 	if (exists($ReservedWord{$lastLexeme{value}})) {
-	    croak "[_eventCallback] Identifier $lastLexeme{value} is a reserved word";
+	    SyntaxError(error => "Identifier $lastLexeme{value} is a reserved word");
 	}
     }
+    #
+    # ------------------------
+    # 2. nulled events (XXX[])
+    # ------------------------
+    #
+    # ------------------------------------
+    # 3. prediction events (^XXX or ^^XXX)
+    # ------------------------------------
+    #
     elsif ($name eq '^INVISIBLE_SEMICOLON') {
       #
       # In the AST, we explicitely associate the ';' to the missing semicolon
@@ -185,14 +197,11 @@ sub _eventCallback {
       my $postLineTerminatorPos = $lastLexeme{start} + $lastLexeme{length};
       my $postLineTerminatorLength = $self->_postLineTerminatorLength($source, $postLineTerminatorPos, $impl);
       if ($postLineTerminatorLength > 0) {
-	  #$log->infof('[_eventCallback] Automatic Semicolon Insertion at position %d, span %d', $postLineTerminatorPos, $postLineTerminatorLength);
-	  #$log->tracef('[_eventCallback] Event %s: lexeme_read(\'SEMICOLON\', %d, %d, \';\')', $name, $postLineTerminatorPos, $postLineTerminatorLength);
 	  $impl->lexeme_read('SEMICOLON', $postLineTerminatorPos, $postLineTerminatorLength, ';');
       }
       my $lname = $name;
       substr($lname, 0, 1, '');
       my $lvalue = ($lname eq 'PLUSPLUS_POSTFIX') ? '++' : '--';
-      #$log->tracef('[_eventCallback] Event %s: lexeme_read(\'%s\', %d, %d, \'%s\')', $name, $lname, $rc, 2, $lvalue);
       $impl->lexeme_read($lname, $rc, 2, $lvalue);
       $rc += 2;
     }
@@ -205,7 +214,6 @@ sub _eventCallback {
           index($source, '/=', $realpos) != $realpos &&
           index($source, '//', $realpos) != $realpos &&
           index($source, '/*', $realpos) != $realpos) {
-        #$log->tracef('[_eventCallback] Event %s: lexeme_read(\'DIV\', %d, 1, \'/\')', $name, $realpos);
         $impl->lexeme_read('DIV', $realpos, 1, '/');
         $rc = $realpos + 1;
       }
@@ -218,7 +226,6 @@ sub _eventCallback {
       if (index($source, '/=', $realpos) == $realpos &&
           index($source, '//', $realpos) != $realpos &&
           index($source, '/*', $realpos) != $realpos) {
-        #$log->tracef('[_eventCallback] Event %s: lexeme_read(\'DIVASSIGN\', %d, 2, \'/=\')', $name, $realpos);
         $impl->lexeme_read('DIVASSIGN', $realpos, 2, '/=');
         $rc = $realpos + 2;
       }
@@ -371,20 +378,16 @@ sub _isEnd {
 sub _insertSemiColon {
   my ($self, $impl, $pos, $length) = @_;
 
-  #$log->tracef('[_insertSemiColon] Automatic Semicolon Insertion at position %d, length %d', $pos, $length);
-  #$log->tracef('[_insertSemiColon] lexeme_read(\'SEMICOLON\', %d, %d, \';\')', $pos, $length);
   if (! $impl->lexeme_read('SEMICOLON', $pos, $length, ';')) {
-    croak "[_insertSemiColon] Automatic Semicolon Insertion not allowed at position $pos";
+    SyntaxError(error => "Automatic Semicolon Insertion not allowed at position $pos");
   }
 }
 
 sub _insertInvisibleSemiColon {
   my ($self, $impl, $pos, $length) = @_;
 
-  #$log->tracef('[_insertInvisibleSemiColon] Automatic Invisible Semicolon Insertion at position %d, length %d', $pos, $length);
-  #$log->tracef('[_insertInvisibleSemiColon] lexeme_read(\'INVISIBLE_SEMICOLON\', %d, %d, \';\')', $pos, $length);
   if (! $impl->lexeme_read('INVISIBLE_SEMICOLON', $pos, $length, ';')) {
-    croak "[_insertInvisibleSemiColon] Automatic Invisible Semicolon Insertion not allowed at position $pos";
+    SyntaxError(error => "Automatic Invisible Semicolon Insertion not allowed at position $pos");
   }
 }
 
@@ -415,10 +418,8 @@ sub _failureCallback {
   } elsif ($self->_isRcurly($source, $rc, $impl)) {
     $self->_insertSemiColon($impl, $rc, 1);
   } else {
-    croak "[_failureCallback] Failure at position $rc: '" . substr($source, $rc, 10) . "'";
+    SyntaxError();
   }
-
-  #$log->tracef('[_failureCallback] Resuming at position %d', $rc);
 
   return $rc;
 }
@@ -444,7 +445,7 @@ sub _endCallback {
       $self->_insertSemiColon($impl, $lastValidPos, 1);
       my $haveProgramCompletion = grep {$_ eq 'Program$'} map {$_->[0]} @{$impl->events};
       if (! $haveProgramCompletion) {
-	  croak "end callback failure";
+	  SyntaxError(error => "Incomplete program");
       }
   }
 }
@@ -462,7 +463,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program - ECMAScr
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 
@@ -528,15 +529,6 @@ Literal ::=
   | NumericLiteral
   | StringLiteral
   | RegularExpressionLiteral
-
-#
-# NumericLiteral definition as per lexical grammar
-#
-event 'NumericLiteral$' = completed <NumericLiteral>
-NumericLiteral ::=
-    DECIMALLITERAL
-  | HEXINTEGERLITERAL
-  | OCTALINTEGERLITERAL
 
 PrimaryExpression ::=
     THIS
@@ -978,8 +970,15 @@ INVISIBLE_SEMICOLON ~ _S_ANY _SLT _S_ANY
 
 NullLiteral                           ::= NULL
 BooleanLiteral                        ::= TRUE | FALSE
-StringLiteral                         ::= STRINGLITERAL
+StringLiteral                         ::= STRINGLITERAL           action => StringLiteral
 RegularExpressionLiteral              ::= REGULAREXPRESSIONLITERAL
+NumericLiteral                        ::= DecimalLiteral
+                                        | HexIntegerLiteral
+                                        | OctalIntegerLiteral
+DecimalLiteral                        ::= DECIMALLITERAL
+HexIntegerLiteral                     ::= HEXINTEGERLITERAL
+OctalIntegerLiteral                   ::= OCTALINTEGERLITERAL
+event 'NumericLiteral$' = completed <NumericLiteral>
 
 # --------------------------------------------------------------------------------------
 #
@@ -1192,58 +1191,6 @@ _HexDigit                              ~ [\p{IsHexDigit}]
 :lexeme ~ <IDENTIFIER>  pause => after event => 'IDENTIFIER$'
 IDENTIFIER                             ~ _IdentifierNameInternal
 
-# --------------
-# DECIMALLITERAL
-# --------------
-DECIMALLITERAL                         ~ _DecimalIntegerLiteral '.' _DecimalDigitsopt _ExponentPartopt
-                                       | '.' _DecimalDigits _ExponentPartopt
-                                       | _DecimalIntegerLiteral _ExponentPartopt
-
-_DecimalDigitsopt                      ~ _DecimalDigits
-_DecimalDigitsopt                      ~
-
-_ExponentPartopt                       ~ _ExponentPart
-_ExponentPartopt                       ~
-
-_DecimalIntegerLiteral                 ~ '0'
-                                       | __NonZeroDigit _DecimalDigitsopt
-
-_DecimalDigits                         ~ __DecimalDigit
-                                       | _DecimalDigits __DecimalDigit
-
-_ExponentPart                          ~ __ExponentIndicator _SignedInteger
-
-_SignedInteger                         ~ _DecimalDigits
-                                       | '+' _DecimalDigits
-                                       | '-' _DecimalDigits
-
-__ExponentIndicator                    ~ [\p{IsExponentIndicator}]
-
-__NonZeroDigit                         ~ [\p{IsNonZeroDigit}]
-
-__DecimalDigit                         ~ [\p{IsDecimalDigit}]
-
-# -----------------
-# HEXINTEGERLITERAL
-# ----------------
-HEXINTEGERLITERAL                      ~ _HexIntegerLiteralInternal
-
-_HexIntegerLiteralInternal             ~ '0x' _HexDigit
-                                       | '0X' _HexDigit
-                                       | _HexIntegerLiteralInternal _HexDigit
-
-# Note: see higher for definition of __HexDigit
-
-# -------------------
-# OCTALINTEGERLITERAL
-# -------------------
-OCTALINTEGERLITERAL                    ~ _OctalIntegerLiteralInternal
-
-_OctalIntegerLiteralInternal           ~ '0' __OctalDigit
-                                       | _OctalIntegerLiteralInternal __OctalDigit
-
-__OctalDigit                           ~ [\p{IsOctalDigit}]
-
 # -----------
 # _WhiteSpace
 # -----------
@@ -1311,6 +1258,15 @@ STRINGLITERAL                          ~ __StringLiteral
 # __RegularExpressionLiteral injected: it is a G1 grammar in RegularExpressionLiteral.pm
 # --------------------------------------------------------------------------------------
 REGULAREXPRESSIONLITERAL               ~ __RegularExpressionLiteral
+
+# --------------------------------------------------------------------------------------
+# __DecimalLiteral      injected: it is a G1 grammar in NumericLiteral.pm
+# __HexIntegerLiteral   injected: it is a G1 grammar in NumericLiteral.pm
+# __OctalIntegerLiteral injected: it is a G1 grammar in NumericLiteral.pm
+# --------------------------------------------------------------------------------------
+DECIMALLITERAL                         ~ __DecimalLiteral
+HEXINTEGERLITERAL                      ~ __HexIntegerLiteral
+OCTALINTEGERLITERAL                    ~ __OctalIntegerLiteral
 
 # -------------------------------------------
 # Injection of reserved keywords happens here

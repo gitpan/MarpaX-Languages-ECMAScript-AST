@@ -6,10 +6,10 @@ package MarpaX::Languages::ECMAScript::AST::Impl;
 # ABSTRACT: Implementation of Marpa's interface
 
 use Marpa::R2 2.074;
-use Carp qw/croak/;
+use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 use MarpaX::Languages::ECMAScript::AST::Impl::Logger;
 
-our $VERSION = '0.004'; # VERSION
+our $VERSION = '0.005'; # VERSION
 
 our $MARPA_TRACE_FILE_HANDLE;
 our $MARPA_TRACE_BUFFER;
@@ -22,12 +22,12 @@ sub BEGIN {
     #
     open($MARPA_TRACE_FILE_HANDLE, '>', \$MARPA_TRACE_BUFFER);
     if (! defined($MARPA_TRACE_FILE_HANDLE)) {
-      croak "Cannot create temporary file handle to tie Marpa logging, $!\n";
+      InternalError(error => "Cannot create temporary file handle to tie Marpa logging, $!\n");
     } else {
       if (! tie ${$MARPA_TRACE_FILE_HANDLE}, 'MarpaX::Languages::ECMAScript::AST::Impl::Logger') {
-        croak "Cannot tie $MARPA_TRACE_FILE_HANDLE, $!\n";
+        InternalError(error => "Cannot tie $MARPA_TRACE_FILE_HANDLE, $!\n");
         if (! close($MARPA_TRACE_FILE_HANDLE)) {
-          croak "Cannot close temporary file handle, $!\n";
+          InternalError(error => "Cannot close temporary file handle, $!\n");
         }
         $MARPA_TRACE_FILE_HANDLE = undef;
       }
@@ -37,10 +37,10 @@ sub BEGIN {
 
 sub new {
 
-  my ($class, $grammarOptionsHashp, $recceOptionsHashp) = @_;
+  my ($class, $grammarOptionsHashp, $recceOptionsHashp, $cachedG) = @_;
 
   my $self  = {};
-  $self->{grammar} = Marpa::R2::Scanless::G->new($grammarOptionsHashp);
+  $self->{grammar} = $cachedG || Marpa::R2::Scanless::G->new($grammarOptionsHashp);
   if (defined($recceOptionsHashp)) {
       $recceOptionsHashp->{grammar} = $self->{grammar};
   } else {
@@ -161,13 +161,18 @@ sub recce {
 }
 
 
-sub g1_rule_ids {
-  return $_[0]->{grammar}->g1_rule_ids();
+sub rule_ids {
+  return $_[0]->{grammar}->rule_ids(@_[1..$#_]);
 }
 
 
-sub rule {
-  return $_[0]->{grammar}->rule(@_[1..$#_]);
+sub rule_expand {
+  return $_[0]->{grammar}->rule_expand(@_[1..$#_]);
+}
+
+
+sub symbol_name {
+  return $_[0]->{grammar}->symbol_name(@_[1..$#_]);
 }
 
 
@@ -185,7 +190,7 @@ MarpaX::Languages::ECMAScript::AST::Impl - Implementation of Marpa's interface
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 
@@ -201,9 +206,9 @@ This modules implements all needed Marpa calls using its Scanless interface. Ple
 
 =head1 SUBROUTINES/METHODS
 
-=head2 new($class, $grammarOptionsHashp, $recceOptionsHashp)
+=head2 new($class, $grammarOptionsHashp, $recceOptionsHashp, $cachedG)
 
-Instantiate a new object. Takes as parameter two references to hashes: the grammar options, the recognizer options. In the recognizer, there is a grammar internal option that will be forced to the grammar object. If the environment variable MARPA_TRACE_TERMINALS is set to a true value, then internal Marpa trace on terminals is activated. If the environment MARPA_TRACE_VALUES is set to a true value, then internal Marpa trace on values is activated. If the environment variable MARPA_TRACE is set to a true value, then both terminals and values internal Marpa traces are activated.
+Instantiate a new object. Takes as parameter two references to hashes: the grammar options, the recognizer options. In the recognizer, there is a grammar internal option that will be forced to the grammar object. If the environment variable MARPA_TRACE_TERMINALS is set to a true value, then internal Marpa trace on terminals is activated. If the environment MARPA_TRACE_VALUES is set to a true value, then internal Marpa trace on values is activated. If the environment variable MARPA_TRACE is set to a true value, then both terminals and values internal Marpa traces are activated. $cachedG is an optional parameter that must be a cached value of Marpa::R2::Scanless::G->new($grammarOptionsHashp). If not present, this value can be retrieved for further use with $self->grammar method.
 
 =head2 value($self)
 
@@ -289,13 +294,17 @@ Returns a Marpa::R2::Scanless::G object of this grammar.
 
 Returns a Marpa::R2::Scanless::R object of this grammar.
 
-=head2 g1_rule_ids($self)
+=head2 rule_ids($self, $subgrammar)
 
-Returns Marpa's grammar's g1_rule_ids.
+Returns Marpa's grammar's rule_ids.
 
-=head2 rule($self)
+=head2 rule_expand($self, $ruleId)
 
-Returns Marpa's grammar's rule.
+Returns Marpa's grammar's rule_expand.
+
+=head2 symbol_name($self, $symbolId)
+
+Returns Marpa's grammar's symbol_name.
 
 =head1 SEE ALSO
 
