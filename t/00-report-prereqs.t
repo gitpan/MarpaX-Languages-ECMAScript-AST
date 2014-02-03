@@ -16,8 +16,11 @@ my @modules = qw(
   CPAN::Meta
   CPAN::Meta::Requirements
   Carp
+  Class::Singleton
   Data::Dumper
+  Data::Float
   Digest::MD4
+  Encode
   Exception::Class
   Exporter
   ExtUtils::MakeMaker
@@ -28,12 +31,17 @@ my @modules = qw(
   File::Temp
   IO::Handle
   IPC::Open3
+  List::Compare::Functional
   List::Util
   Log::Any
   Marpa::R2
+  Math::BigFloat
   Module::Util
   SUPER
+  Scalar::Util
+  Test::Differences
   Test::More
+  base
   constant
   diagnostics
   parent

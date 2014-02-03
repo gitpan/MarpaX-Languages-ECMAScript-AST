@@ -10,7 +10,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical string grammar written in Marpa BNF
 
-our $VERSION = '0.005'; # VERSION
+our $VERSION = '0.006'; # TRIAL VERSION
 
 
 
@@ -28,22 +28,11 @@ sub new {
 }
 
 
-sub parse {
-    my ($self, $source, $impl) = @_;
-    return $self->SUPER($source, $impl,
-	{
-	 #   '_DecimalLiteral$'     => \&_DecimalLiteral,
-	 #   '_HexIntegerLiteral$'  => \&_HexIntegerLiteral,
-	 #   '_OctalIntegerLiteral$'=> \&_OctalIntegerLiteral,
-	 #   '_IdentifierName$'     => \&_IdentifierName
-	});
+sub original_content {
+    return $grammar_source;
 }
 
-sub _DecimalLiteral {
-    my ($self, $lexemeHashp, $source, $impl) = @_;
-
-    $self->_NumericLiteralLookhead($lexemeHashp, $source, $impl);
-}
+#
 
 
 1;
@@ -58,7 +47,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLi
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 SYNOPSIS
 
@@ -82,9 +71,9 @@ This modules returns describes the ECMAScript 262, Edition 5 lexical string gram
 
 Instance a new object.
 
-=head2 parse($self, $source)
+=head2 original_content()
 
-Parse the source given as reference to a scalar.
+Class method returning the grammar content as found in this module.
 
 =head1 SEE ALSO
 

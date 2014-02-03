@@ -3,7 +3,7 @@ use warnings;
 
 # this test was generated with Dist::Zilla::Plugin::Test::Compile 2.037
 
-use Test::More  tests => 26 + ($ENV{AUTHOR_TESTING} ? 1 : 0);
+use Test::More  tests => 32 + ($ENV{AUTHOR_TESTING} ? 1 : 0);
 
 
 
@@ -17,7 +17,6 @@ my @module_files = (
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Actions.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Base.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/CharacterClasses.pm',
-    'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/Actions.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/NumericLiteral.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/NumericLiteral/Actions.pm',
@@ -25,9 +24,16 @@ my @module_files = (
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/RegularExpressionLiteral/Actions.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/StringLiteral.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/StringLiteral/Actions.pm',
+    'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Pattern.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Pattern/Actions.pm',
+    'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Pattern/DefaultSemanticsPackage.pm',
+    'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Pattern/Singleton.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Program.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Program/Actions.pm',
+    'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Program/Singleton.pm',
+    'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/StringNumericLiteral.pm',
+    'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/StringNumericLiteral/DefaultSemanticsPackage.pm',
+    'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/StringNumericLiteral/Singleton.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Template.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Uri.pm',
     'MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Uri/Actions.pm',

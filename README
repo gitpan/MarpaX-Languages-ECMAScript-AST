@@ -3,7 +3,7 @@ NAME
     AST
 
 VERSION
-    version 0.005
+    version 0.006
 
 SYNOPSIS
         use strict;
@@ -32,11 +32,8 @@ SYNOPSIS
         $log->infof('%s', $ecmaAstObject->parse($ecmaSourceCode));
 
 DESCRIPTION
-    This module translates ECMAScript source into an AST tree. To assist
-    further process of the AST tree, the nodes of the AST are blessed
-    according to the ECMAScript grammar you have selected. (The default is
-    'ECMAScript-262-5'.) If you want to enable logging, be aware that this
-    module is using Log::Any.
+    This module translates ECMAScript source into an AST tree. If you want
+    to enable logging, be aware that this module is using Log::Any.
 
 SUBROUTINES/METHODS
   new($class, %options)
@@ -53,6 +50,22 @@ SUBROUTINES/METHODS
         being handled. The cache location is the my_dist_data directory
         provided by File::HomeDir package. Default is a false value.
 
+    ANYTHINGELSE
+        Any other option that will be specific to the ECMAScript specific
+        implementation. In practice these are:
+
+        Template
+            Reference to a hash for template options. C.f. per-ECMAScript
+            documentation.
+
+        StringNumericLiteral
+            Reference to a hash for StringNumericLiteral grammar options.
+            C.f. per-ECMAScript documentation.
+
+        Pattern
+            Reference to a hash for Pattern grammar options. C.f.
+            per-ECMAScript documentation.
+
   describe($self)
     Get a description of the G1 grammar. Returns a reference to hash, that
     has this structure: key => value, where
@@ -68,17 +81,42 @@ SUBROUTINES/METHODS
     Returns the templates absolute path.
 
   parse($self, $source)
-    Get and AST from the ECMAScript source, pointed by $source. This method
+    Get an AST from the ECMAScript source, pointed by $source. This method
     will call all the intermediary steps (lexical, transformation,
-    evaluation) necessary to produce the AST.
+    evaluation) necessary to produce the AST. An AST is a reference to
+    nested arrays, containing either:
+
+    valuesAndRuleId
+        An entry describing a G1 rule (i.e. a non-terminal) is a reference
+        to an array. The array contains the values of the right-hand side of
+        the rule, followed by the rule Id.
+
+    startAndLengthAndValue
+        An entry describing a lexeme (i.e. a terminal) is a reference to an
+        array. The array contains the start location in the stream, length
+        and lexeme as perl's utf8 string.
 
   template($self)
     Return the generic template for this grammar. This template is doing
     nothing else but reproduce an ECMAScript source that, if parsed, would
     have an AST similar to the original source.
 
+  stringNumericLiteral($self)
+    Return the generic stringNumericLiteral for this grammar.
+
+  pattern($self)
+    Return the generic Pattern for this grammar.
+
 SEE ALSO
-    Log::Any, Marpa::R2, Digest::MD4, CHI::Driver::File
+    Log::Any
+
+    Marpa::R2
+
+    Digest::MD4
+
+    CHI::Driver::File
+
+    MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5
 
 SUPPORT
   Bugs / Feature Requests

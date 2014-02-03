@@ -8,7 +8,7 @@ package MarpaX::Languages::ECMAScript::AST::Grammar;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5;
 use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 
-our $VERSION = '0.005'; # VERSION
+our $VERSION = '0.006'; # TRIAL VERSION
 
 
 sub new {
@@ -31,7 +31,7 @@ sub new {
 
 sub program {
     my ($self) = @_;
-    return $self->{_grammar}->program();
+    return $self->{_grammar}->program;
 }
 
 
@@ -43,7 +43,19 @@ sub grammarAlias {
 
 sub template {
     my ($self) = @_;
-    return $self->{_grammar}->template();
+    return $self->{_grammar}->template;
+}
+
+
+sub stringNumericLiteral {
+    my ($self) = @_;
+    return $self->{_grammar}->stringNumericLiteral;
+}
+
+
+sub pattern {
+    my ($self) = @_;
+    return $self->{_grammar}->pattern;
 }
 
 
@@ -61,7 +73,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar - ECMAScript grammar written in Marp
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 SYNOPSIS
 
@@ -118,6 +130,14 @@ Returns the grammar alias, i.e. the one really used in this distribution.
 =head2 template($self)
 
 Returns the generic template associated to grammarName.
+
+=head2 stringNumericLiteral($self)
+
+Returns the generic stringNumericLiteral associated to grammarName.
+
+=head2 pattern($self)
+
+Returns the generic pattern associated to grammarName.
 
 =head1 SEE ALSO
 

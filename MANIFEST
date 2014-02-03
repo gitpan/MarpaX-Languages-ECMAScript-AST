@@ -15,7 +15,6 @@ lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Actions.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Base.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/CharacterClasses.pm
-lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/Actions.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/NumericLiteral.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/NumericLiteral/Actions.pm
@@ -23,9 +22,16 @@ lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/RegularExpr
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/RegularExpressionLiteral/Actions.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/StringLiteral.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Lexical/StringLiteral/Actions.pm
+lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Pattern.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Pattern/Actions.pm
+lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Pattern/DefaultSemanticsPackage.pm
+lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Pattern/Singleton.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Program.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Program/Actions.pm
+lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Program/Singleton.pm
+lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/StringNumericLiteral.pm
+lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/StringNumericLiteral/DefaultSemanticsPackage.pm
+lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/StringNumericLiteral/Singleton.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Template.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Uri.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar/ECMAScript_262_5/Uri/Actions.pm
@@ -43,6 +49,9 @@ t/jquery-1.10.2.min.t
 t/jquery-1.10.2.t
 t/jquery-2.0.3.min.t
 t/jquery-2.0.3.t
+t/pattern.t
+t/stringNumericLiteralBigFloat.t
+t/stringNumericLiteralNative.t
 t/underscore-1.5.2.min.t
 t/underscore-1.5.2.t
 xt/author/critic.t

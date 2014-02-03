@@ -3,13 +3,18 @@ use warnings FATAL => 'all';
 
 package MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses;
 use Exporter 'import';
+use Encode qw/decode/;
 
 # ABSTRACT: ECMAScript, character classes
 
-our $VERSION = '0.005'; # VERSION
+our $VERSION = '0.006'; # TRIAL VERSION
 
 
 our @EXPORT_OK = qw/
+BOM
+BS
+CR
+FF
 Isb
 IsBackslash
 IsBOM
@@ -19,6 +24,7 @@ IsDecimalDigit
 IsDollar
 IsDot
 IsDquote
+IseOrE
 Ise
 IsE
 IsEight
@@ -27,6 +33,7 @@ IsExponentIndicator
 Isf
 IsFF
 IsHexDigit
+IsIdentityEscape
 IsLbracket
 IsLcurly
 IsLF
@@ -38,6 +45,7 @@ Isn
 IsNBSP
 IsNine
 IsNonZeroDigit
+IsNULL
 IsOctalDigit
 IsPatternCharacter
 IsPipe
@@ -56,7 +64,7 @@ IsSingleEscapeCharacter
 IsSlash
 IsSourceCharacter
 IsSourceCharacterButNotLineTerminator
-IsSourceCharacterButNotOneOfBackslashOrRbracketorMinus
+IsSourceCharacterButNotOneOfBackslashOrRbracketOrMinus
 IsSourceCharacterButNotOneOfDquoteOrBackslashOrLineTerminator
 IsSourceCharacterButNotOneOfEscapeCharacterOrLineTerminator
 IsSourceCharacterButNotOneOfSlashOrStar
@@ -71,6 +79,7 @@ IsStar
 Ist
 IsTAB
 Isu
+IsUnderscore
 IsUnicodeCombiningMark
 IsUnicodeConnectorPunctuation
 IsUnicodeDigit
@@ -85,6 +94,17 @@ IsZeroToThree
 IsFourToSeven
 IsZWJ
 IsZWNJ
+LineTerminator
+LF
+LS
+NBSP
+NULL
+PS
+SP
+TAB
+USP
+VT
+WhiteSpace
 /;
 our %EXPORT_TAGS = ('all' => \@EXPORT_OK);
 
@@ -93,7 +113,10 @@ our $SLASH           = sprintf('%x', ord('/'));
 our $BACKSLASH       = sprintf('%x', ord('\\'));
 our $DQUOTE          = sprintf('%x', ord('"'));
 our $SQUOTE          = sprintf('%x', ord("'"));
+our $a               = sprintf('%x', ord('a'));
 our $b               = sprintf('%x', ord('b'));
+our $c               = sprintf('%x', ord('c'));
+our $d               = sprintf('%x', ord('d'));
 our $e               = sprintf('%x', ord('e'));
 our $f               = sprintf('%x', ord('f'));
 our $n               = sprintf('%x', ord('n'));
@@ -102,9 +125,12 @@ our $t               = sprintf('%x', ord('t'));
 our $u               = sprintf('%x', ord('u'));
 our $v               = sprintf('%x', ord('v'));
 our $x               = sprintf('%x', ord('x'));
+our $A               = sprintf('%x', ord('A'));
+our $B               = sprintf('%x', ord('B'));
+our $C               = sprintf('%x', ord('C'));
+our $D               = sprintf('%x', ord('D'));
 our $E               = sprintf('%x', ord('E'));
-our $EIGHT           = sprintf('%x', ord('8'));
-our $NINE            = sprintf('%x', ord('9'));
+our $F               = sprintf('%x', ord('F'));
 our $LBRACKET        = sprintf('%x', ord('['));
 our $RBRACKET        = sprintf('%x', ord(']'));
 our $LPAREN          = sprintf('%x', ord('('));
@@ -113,6 +139,7 @@ our $LCURLY          = sprintf('%x', ord('{'));
 our $RCURLY          = sprintf('%x', ord('}'));
 our $CARET           = sprintf('%x', ord('^'));
 our $DOLLAR          = sprintf('%x', ord('$'));
+our $UNDERSCORE      = sprintf('%x', ord('_'));
 our $DOT             = sprintf('%x', ord('.'));
 our $PLUS            = sprintf('%x', ord('+'));
 our $QUESTION_MARK   = sprintf('%x', ord('?'));
@@ -126,6 +153,8 @@ our $FOUR            = sprintf('%x', ord('4'));
 our $FIVE            = sprintf('%x', ord('5'));
 our $SIX             = sprintf('%x', ord('6'));
 our $SEVEN           = sprintf('%x', ord('7'));
+our $EIGHT           = sprintf('%x', ord('8'));
+our $NINE            = sprintf('%x', ord('9'));
 
 
 sub IsWhiteSpace { return <<END;
@@ -137,6 +166,18 @@ sub IsWhiteSpace { return <<END;
 +MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsBOM
 +MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsUSP
 END
+}
+
+
+sub WhiteSpace { return [
+		     @{TAB()},
+		     @{VT()},
+		     @{FF()},
+		     @{SP()},
+		     @{NBSP()},
+		     @{BOM()},
+		     @{USP()},
+		     ];
 }
 
 
@@ -164,10 +205,19 @@ END
 }
 
 
+sub BOM { return [ "\N{U+FEFF}" ] }
+
+
+sub BS { return [ "\N{U+0008}" ] }
+
+
 sub IsTAB { return <<END;
 0009
 END
 }
+
+
+sub TAB { return [ "\N{U+0009}" ] }
 
 
 sub IsVT { return <<END;
@@ -176,10 +226,16 @@ END
 }
 
 
+sub VT { return [ "\N{U+000B}" ] }
+
+
 sub IsFF { return <<END;
 000C
 END
 }
+
+
+sub FF { return [ "\N{U+000C}" ] }
 
 
 sub IsSP { return <<END;
@@ -188,10 +244,16 @@ END
 }
 
 
+sub SP { return [ "\N{U+0020}" ] }
+
+
 sub IsNBSP { return <<END;
 00A0
 END
 }
+
+
+sub NBSP { return [ "\N{U+00A0}" ] }
 
 
 sub IsUSP { return <<END;
@@ -200,10 +262,45 @@ END
 }
 
 
+our @USP = ();
+{
+    #
+    # We do as "unichars". And hardcode restriction to 65535, i.e.
+    # the maximum supported by ECMAScript
+    #
+    foreach (0..65535) {
+        # gaggy UTF-16 surrogates are invalid UTF-8 code points
+        next if ($_ >= 0xD800 && $_ <= 0xDFFF);
+
+        # from utf8.c in perl src; must avoid fatals in 5.10
+        next if ($_ >= 0xFDD0 && $_ <= 0xFDEF);
+
+        next if (0xFFFE == ($_ & 0xFFFE)); # both FFFE and FFFF
+
+        # see "Unicode non-character %s is illegal for interchange" in perldiag(1)
+        $_ = do { no warnings "utf8"; chr($_) };
+
+        # fixes "the Unicode bug"
+        unless (utf8::is_utf8($_)) {
+            $_ = decode("iso-8859-1", $_);
+        }
+
+	if ($_ =~ /\p{Zs}/) {
+	    push(@USP, $_);
+	}
+    }
+}
+
+sub USP { return \@USP }
+
+
 sub IsLF { return <<END;
 000A
 END
 }
+
+
+sub LF { return [ "\N{U+000A}" ]; }
 
 
 sub IsCR { return <<END;
@@ -212,16 +309,34 @@ END
 }
 
 
+sub CR { return [ "\N{U+000D}" ]; }
+
+
+sub IsNULL { return <<END;
+0000
+END
+}
+
+
+sub NULL { return [ "\N{U+0000}" ]; }
+
+
 sub IsLS { return <<END;
 2028
 END
 }
 
 
+sub LS { return [ "\N{U+2028}" ]; }
+
+
 sub IsPS { return <<END;
 2029
 END
 }
+
+
+sub PS { return [ "\N{U+2029}" ]; }
 
 
 sub IsSourceCharacterButNotStar { return <<END;
@@ -270,6 +385,15 @@ sub IsLineTerminator { return <<END;
 +MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsPS
 END
 }
+
+
+sub LineTerminator { return
+			 [
+			  @{LF()},
+			  @{CR()},
+			  @{LS()},
+			  @{PS()}
+			 ]; }
 
 
 sub IsSourceCharacterButNotLineTerminator { return <<END;
@@ -341,17 +465,14 @@ END
 }
 
 #
-# Note: PosixDigit is a perl extension
+# Note: PosixDigit is a perl extension, changed to be coherent with RT #91120
 #
 
 sub IsDecimalDigit { return <<END;
-+utf8::PosixDigit
+$ZERO\t$NINE
 END
 }
 
-#
-# Note: PosixDigit is a perl extension
-#
 
 sub IsOctalDigit { return <<END;
 +MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsDecimalDigit
@@ -419,10 +540,27 @@ END
 }
 
 #
-# Note: PosixXDigit is a perl extension
+# Note: PosixXDigit is a perl extension, not available before perl-5.12.5 RT #91120
+#
 
 sub IsHexDigit { return <<END;
-+utf8::PosixXDigit
+$ZERO\t$NINE
+$A\t$F
+$a\t$f
+END
+}
+
+
+sub IsIdentityEscape { return <<END;
++MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsSourceCharacter
+-MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsUnicodeLetter
+-MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsDollar
+-MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsUnderscore
+-MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsUnicodeCombiningMark
+-MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsUnicodeDigit
+-MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsUnicodeConnectorPunctuation
++MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsZWNJ
++MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsZWJ
 END
 }
 
@@ -454,7 +592,7 @@ END
 }
 
 
-sub IsSourceCharacterButNotOneOfBackslashOrRbracketorMinus { return <<END;
+sub IsSourceCharacterButNotOneOfBackslashOrRbracketOrMinus { return <<END;
 +MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsSourceCharacter
 -MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsBackslash
 -MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsRbracket
@@ -473,6 +611,12 @@ END
 
 sub Isu { return <<END;
 $u
+END
+}
+
+
+sub IsUnderscore { return <<END;
+$UNDERSCORE
 END
 }
 
@@ -616,6 +760,13 @@ END
 }
 
 
+sub IseOrE { return <<END;
++MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::Ise
++MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsE
+END
+}
+
+
 sub Isn { return <<END;
 $n
 END
@@ -669,6 +820,9 @@ $SEVEN
 END
 }
 
+
+1;
+
 __END__
 
 =pod
@@ -681,7 +835,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses - ECMAScript, char
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 SYNOPSIS
 
@@ -691,6 +845,10 @@ version 0.005
 
 =head2 IsWhiteSpace()
 
+=head2 WhiteSpace()
+
+Return an array reference of characters composing WhiteSpace
+
 =head2 IsSourceCharacter()
 
 =head2 IsZWNJ()
@@ -699,25 +857,79 @@ version 0.005
 
 =head2 IsBOM()
 
+=head2 BOM()
+
+Return an array reference of characters composing BOM
+
+=head2 BS()
+
+Return an array reference of characters composing BS
+
 =head2 IsTAB()
+
+=head2 TAB()
+
+Return an array reference of characters composing TAB
 
 =head2 IsVT()
 
+=head2 VT()
+
+Return an array reference of characters composing VT
+
 =head2 IsFF()
+
+=head2 FF()
+
+Return an array reference of characters composing FF
 
 =head2 IsSP()
 
+=head2 SP()
+
+Return an array reference of characters composing SP
+
 =head2 IsNBSP()
+
+=head2 NBSP()
+
+Return an array reference of characters composing NBSP
 
 =head2 IsUSP()
 
+=head2 USP()
+
+Return an array reference of characters composing USP
+
 =head2 IsLF()
+
+=head2 LF()
+
+Return an array reference of characters composing LF
 
 =head2 IsCR()
 
+=head2 CR()
+
+Return an array reference of characters composing CR
+
+=head2 IsNULL()
+
+=head2 NULL()
+
+Return an array reference of characters composing NULL
+
 =head2 IsLS()
 
+=head2 LS()
+
+Return an array reference of characters composing LS
+
 =head2 IsPS()
+
+=head2 PS()
+
+Return an array reference of characters composing PS
 
 =head2 IsSourceCharacterButNotStar()
 
@@ -730,6 +942,10 @@ version 0.005
 =head2 IsSourceCharacterButNotOneOfSlashOrStarOrLineTerminator()
 
 =head2 IsLineTerminator()
+
+=head2 LineTerminator()
+
+Return an array reference of characters composing LineTerminator
 
 =head2 IsSourceCharacterButNotLineTerminator()
 
@@ -767,15 +983,19 @@ version 0.005
 
 =head2 IsHexDigit()
 
+=head2 IsIdentityEscape()
+
 =head2 IsExponentIndicator()
 
 =head2 IsPatternCharacter()
 
-=head2 IsSourceCharacterButNotOneOfBackslashOrRbracketorMinus()
+=head2 IsSourceCharacterButNotOneOfBackslashOrRbracketOrMinus()
 
 =head2 Isx()
 
 =head2 Isu()
+
+=head2 IsUnderscore()
 
 =head2 Isv()
 
@@ -823,6 +1043,8 @@ version 0.005
 
 =head2 IsE()
 
+=head2 IseOrE()
+
 =head2 Isn()
 
 =head2 Isr()
@@ -854,8 +1076,6 @@ This module is exporting on demand the following tags:
 All functions.
 
 =back
-
-1;
 
 =head1 AUTHOR
 

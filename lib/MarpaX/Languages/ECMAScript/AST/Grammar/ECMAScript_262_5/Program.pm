@@ -11,6 +11,7 @@ use warnings FATAL => 'all';
 
 package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program;
 use parent qw/MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base/;
+use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Singleton;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Actions;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::RegularExpressionLiteral;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral;
@@ -22,7 +23,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical program grammar written in Marpa BNF
 
-our $VERSION = '0.005'; # VERSION
+our $VERSION = '0.006'; # TRIAL VERSION
 
 our $WhiteSpace        = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsWhiteSpace}])/;
 our $LineTerminator    = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsLineTerminator}])/;
@@ -94,6 +95,15 @@ $grammar_source .= $StringLiteral->extract;
 $grammar_source .= $NumericLiteral->extract;
 $grammar_source .= $RegularExpressionLiteral->extract;
 
+our $singleton = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Singleton->instance(
+    MarpaX::Languages::ECMAScript::AST::Impl->new
+    (
+     __PACKAGE__->make_grammar_option(__PACKAGE__, 'ECMAScript-262-5', $grammar_source),
+     undef,                                   # $recceOptionsHashp
+     undef,                                   # $cachedG
+     1                                        # $noR
+    )->grammar
+    );
 
 #
 # For convenience in the IDENTIFIER$ lexeme callback, we merge Keyword, FutureReservedWord, NullLiteral, BooleanLiteral into
@@ -109,6 +119,11 @@ sub new {
     my $self = $class->SUPER($grammar_source, __PACKAGE__);
 
     return $self;
+}
+
+
+sub G {
+    return $singleton->G;
 }
 
 
@@ -463,7 +478,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program - ECMAScr
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 SYNOPSIS
 
@@ -487,9 +502,13 @@ This modules returns describes the ECMAScript 262, Edition 5 lexical program gra
 
 Instance a new object.
 
-=head2 parse($self, $source)
+=head2 G()
 
-Parse the source given as $source.
+Cached Marpa::R2::Scanless::G compiled grammar.
+
+=head2 parse($self, $source, $impl)
+
+Parse the source given as $source using implementation $impl.
 
 =head1 SEE ALSO
 
