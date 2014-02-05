@@ -8,15 +8,13 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, grammars base package
 
-our $VERSION = '0.006'; # TRIAL VERSION
+our $VERSION = '0.007'; # TRIAL VERSION
 
 
 sub new {
-  my $class = shift;
-  my $grammar = shift;
-  my $package = shift;
+  my ($class) = @_;
 
-  return $class->SUPER($grammar, $package, 'ECMAScript_262_5', @_);
+  return $class->SUPER('ECMAScript_262_5');
 
 }
 
@@ -35,7 +33,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base - ECMAScript
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 SYNOPSIS
 

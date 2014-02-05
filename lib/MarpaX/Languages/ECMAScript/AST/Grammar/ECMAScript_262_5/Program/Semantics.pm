@@ -1,7 +1,7 @@
 use strict;
 use warnings FATAL => 'all';
 
-package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Actions;
+package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Semantics;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral;
 
 our $StringLiteral = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral->new();
@@ -9,7 +9,7 @@ our $StringLiteralImpl = MarpaX::Languages::ECMAScript::AST::Impl->new($StringLi
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical expressions grammar actions
 
-our $VERSION = '0.006'; # TRIAL VERSION
+our $VERSION = '0.007'; # TRIAL VERSION
 
 use constant AST => 'MarpaX::Languages::ECMAScript::AST';
 
@@ -42,12 +42,6 @@ sub StringLiteral {
     # We just re-evaluate the value. Per def there is no need to eval, the lexeme
     # got matched.
     #
-    # It is quite consuming to redo a full grammar stuff. So instead let's look at
-    # the differences between a true perl string and a JavaScript string.
-    # The difference is always related with escape sequence thingies, c.f.
-    # StringTerminal/Actions.pm
-    #
-
     $lexemeActionValuep->[2] = $StringLiteral->parse($lexemeActionValuep->[2], $StringLiteralImpl)->value($StringLiteralImpl);
 
     return $lexemeActionValuep;
@@ -63,11 +57,11 @@ __END__
 
 =head1 NAME
 
-MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Actions - ECMAScript 262, Edition 5, lexical expressions grammar actions
+MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Semantics - ECMAScript 262, Edition 5, lexical expressions grammar actions
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 DESCRIPTION
 

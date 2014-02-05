@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern;
 use parent qw/MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base/;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Singleton;
-use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::DefaultSemanticsPackage;
+use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Semantics;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses;
 use SUPER;
 use Carp qw/croak/;
@@ -12,18 +12,18 @@ use Scalar::Util qw/blessed/;
 
 # ABSTRACT: ECMAScript-262, Edition 5, pattern grammar written in Marpa BNF
 
-our $VERSION = '0.006'; # TRIAL VERSION
+our $VERSION = '0.007'; # TRIAL VERSION
 
 
 #
 # Note that this grammar is NOT supposed to be injected in Program
 #
-our $grammar_source = do {local $/; <DATA>};
+our $grammar_content = do {local $/; <DATA>};
 
 our $singleton = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Singleton->instance(
     MarpaX::Languages::ECMAScript::AST::Impl->new
     (
-     __PACKAGE__->make_grammar_option(__PACKAGE__, 'ECMAScript-262-5', $grammar_source),
+     __PACKAGE__->make_grammar_option('ECMAScript-262-5'),
      undef,                                   # $recceOptionsHashp
      undef,                                   # $cachedG
      1                                        # $noR
@@ -36,9 +36,9 @@ sub new {
 
     $optionsp //= {};
 
-    my $semantics_package = exists($optionsp->{semantics_package}) ? $optionsp->{semantics_package} : __PACKAGE__ . '::DefaultSemanticsPackage';
+    my $semantics_package = exists($optionsp->{semantics_package}) ? $optionsp->{semantics_package} : __PACKAGE__ . '::Semantics';
 
-    my $self = $class->SUPER($grammar_source, __PACKAGE__);
+    my $self = $class->SUPER();
 
     #
     # Add semantics package to self
@@ -53,6 +53,12 @@ sub new {
 }
 
 
+sub make_grammar_content {
+    my ($class) = @_;
+    return $grammar_content;
+}
+
+
 sub lparen {
     my ($self) = @_;
 
@@ -62,21 +68,16 @@ sub lparen {
 
 sub recce_option {
     my ($self) = @_;
-    my $recce_option = super();
-    
-    $recce_option->{semantics_package} = $self->{_semantics_package};
+    #
+    # Get default hash
+    #
+    my $default = $self->SUPER();
+    #
+    # And overwrite the semantics_package
+    #
+    $default->{semantics_package} = $self->{_semantics_package};
 
-    return $recce_option;
-}
-
-
-sub make_grammar_option {
-    my ($class) = @_;
-    my $grammar_option = super();
-    
-    delete($grammar_option->{action_object});
-
-    return $grammar_option;
+    return $default;
 }
 
 
@@ -154,7 +155,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern - ECMAScr
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 SYNOPSIS
 
@@ -186,17 +187,17 @@ As per Marpa::R2, The semantics package is used when resolving action names to f
 
 =back
 
+=head2 make_grammar_content($class)
+
+Returns the grammar. This will be injected in the Program's grammar.
+
 =head2 lparen($self)
 
 Returns current lexer left parenthesis offsets of captures.
 
-=head2 recce_option($self, $package)
+=head2 recce_option($self)
 
-Returns recce options.
-
-=head2 make_grammar_option($class, $package)
-
-Returns default grammar options.
+Returns option for Marpa::R2::Scanless::R->new(), returned as a reference to a hash.
 
 =head2 G()
 
@@ -338,14 +339,12 @@ IdentityEscape ~
 DecimalEscape ::= # Lookahead not in decimal digit is automatic
     DecimalIntegerLiteral                           action => _DecimalEscape_DecimalIntegerLiteral
 
-DecimalIntegerLiteral ~
-    '0'
-  | _NonZeroDigit
-  | _NonZeroDigit _DecimalDigits
+DecimalIntegerLiteral ::=
+    '0'                                             action => _DecimalIntegerLiteral_Zero
+  | _NonZeroDigit                                   action => _DecimalIntegerLiteral_NonZeroDigit
+  | _NonZeroDigit DecimalDigits                     action => _DecimalIntegerLiteral_NonZeroDigit_DecimalDigits
 
-_DecimalDigits ~ _DecimalDigit+
-
-DecimalDigits ~ _DecimalDigits
+DecimalDigits ::= _DecimalDigit+                    action => _DecimalDigits
 
 _NonZeroDigit      ~ [\p{IsNonZeroDigit}]
 _DecimalDigit      ~ [\p{IsDecimalDigit}]

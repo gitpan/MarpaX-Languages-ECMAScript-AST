@@ -3,36 +3,31 @@ use warnings FATAL => 'all';
 
 package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral;
 use parent qw/MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base/;
-use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral::Actions;
-use Carp qw/croak/;
-use Log::Any qw/$log/;
-use SUPER;
+use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral::Semantics;
 
-# ABSTRACT: ECMAScript-262, Edition 5, lexical string grammar written in Marpa BNF
+# ABSTRACT: ECMAScript-262, Edition 5, string literal grammar written in Marpa BNF
 
-our $VERSION = '0.006'; # TRIAL VERSION
-
+our $VERSION = '0.007'; # TRIAL VERSION
 
 
 #
 # Prevent injection of this grammar to collide with others:
 # ___yy is changed to ___StringLiteral___yy
 #
-our $grammar_source = do {local $/; <DATA>};
-$grammar_source =~ s/___/___StringLiteral___/g;
+our $grammar_content = do {local $/; <DATA>};
+$grammar_content =~ s/___/___StringLiteral___/g;
 
-sub new {
+
+sub make_grammar_content {
     my ($class) = @_;
-
-    return $class->SUPER($grammar_source, __PACKAGE__);
+    return $grammar_content;
 }
 
 
-sub original_content {
-    return $grammar_source;
+sub make_semantics_package {
+    my ($class) = @_;
+    return join('::', $class, 'DefaultSemanticsPackage');
 }
-
-#
 
 
 1;
@@ -43,11 +38,11 @@ sub original_content {
 
 =head1 NAME
 
-MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral - ECMAScript-262, Edition 5, lexical string grammar written in Marpa BNF
+MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral - ECMAScript-262, Edition 5, string literal grammar written in Marpa BNF
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 SYNOPSIS
 
@@ -63,17 +58,19 @@ version 0.006
 
 =head1 DESCRIPTION
 
-This modules returns describes the ECMAScript 262, Edition 5 lexical string grammar written in Marpa BNF, as of L<http://www.ecma-international.org/publications/standards/Ecma-262.htm>. This module inherits the methods from MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base package.
+This modules returns describes the ECMAScript 262, Edition 5 lexical string literal grammar written in Marpa BNF, as of L<http://www.ecma-international.org/publications/standards/Ecma-262.htm>.
+
+This module inherits the methods from MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base package, and have a semantics.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 new()
+=head2 make_grammar_content($class)
 
-Instance a new object.
+Returns the grammar. This will be injected in the Program's grammar.
 
-=head2 original_content()
+=head2 semantics_package($class)
 
-Class method returning the grammar content as found in this module.
+Class method that returns a default recce semantics_package, doing nothing else but a new().
 
 =head1 SEE ALSO
 

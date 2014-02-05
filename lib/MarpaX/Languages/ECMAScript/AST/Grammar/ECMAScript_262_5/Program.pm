@@ -12,7 +12,7 @@ use warnings FATAL => 'all';
 package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program;
 use parent qw/MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base/;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Singleton;
-use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Actions;
+use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Semantics;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::RegularExpressionLiteral;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::NumericLiteral;
@@ -23,7 +23,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical program grammar written in Marpa BNF
 
-our $VERSION = '0.006'; # TRIAL VERSION
+our $VERSION = '0.007'; # TRIAL VERSION
 
 our $WhiteSpace        = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsWhiteSpace}])/;
 our $LineTerminator    = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsLineTerminator}])/;
@@ -60,7 +60,7 @@ our @NullLiteral = qw/null/;
 
 our @BooleanLiteral = qw/true false/;
 
-our $grammar_source = do {local $/; <DATA>};
+our $grammar_content = do {local $/; <DATA>};
 
 #
 # It is clearer to have reserved words in an array. But for efficienvy the hash is better,
@@ -76,29 +76,29 @@ our %BooleanLiteral           = map {($_, uc($_))} @BooleanLiteral;
 #
 # ... And we inject in the grammar those that exist (FutureReservedWord do not)
 #
-$grammar_source .= "\n";
+$grammar_content .= "\n";
 # ... Priorities
-map {$grammar_source .= ":lexeme ~ <$_> priority => 1\n"} values %Keyword;
-map {$grammar_source .= ":lexeme ~ <$_> priority => 1\n"} values %NullLiteral;
-map {$grammar_source .= ":lexeme ~ <$_> priority => 1\n"} values %BooleanLiteral;
+map {$grammar_content .= ":lexeme ~ <$_> priority => 1\n"} values %Keyword;
+map {$grammar_content .= ":lexeme ~ <$_> priority => 1\n"} values %NullLiteral;
+map {$grammar_content .= ":lexeme ~ <$_> priority => 1\n"} values %BooleanLiteral;
 # ... Definition
-map {$grammar_source .= uc($_) . " ~ '$_'\n"} @Keyword;
-map {$grammar_source .= uc($_) . " ~ '$_'\n"} @NullLiteral;
-map {$grammar_source .= uc($_) . " ~ '$_'\n"} @BooleanLiteral;
+map {$grammar_content .= uc($_) . " ~ '$_'\n"} @Keyword;
+map {$grammar_content .= uc($_) . " ~ '$_'\n"} @NullLiteral;
+map {$grammar_content .= uc($_) . " ~ '$_'\n"} @BooleanLiteral;
 #
 # Injection of grammars.
 #
 our $StringLiteral = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral->new();
 our $RegularExpressionLiteral = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::RegularExpressionLiteral->new();
 our $NumericLiteral = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::NumericLiteral->new();
-$grammar_source .= $StringLiteral->extract;
-$grammar_source .= $NumericLiteral->extract;
-$grammar_source .= $RegularExpressionLiteral->extract;
+$grammar_content .= $StringLiteral->extract;
+$grammar_content .= $NumericLiteral->extract;
+$grammar_content .= $RegularExpressionLiteral->extract;
 
 our $singleton = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Singleton->instance(
     MarpaX::Languages::ECMAScript::AST::Impl->new
     (
-     __PACKAGE__->make_grammar_option(__PACKAGE__, 'ECMAScript-262-5', $grammar_source),
+     __PACKAGE__->make_grammar_option('ECMAScript-262-5'),
      undef,                                   # $recceOptionsHashp
      undef,                                   # $cachedG
      1                                        # $noR
@@ -113,12 +113,15 @@ our %ReservedWord = map {$_ => 1} (keys %Keyword, keys %FutureReservedWord, keys
 
 
 
-sub new {
+sub make_grammar_content {
     my ($class) = @_;
+    return $grammar_content;
+}
 
-    my $self = $class->SUPER($grammar_source, __PACKAGE__);
 
-    return $self;
+sub make_semantics_package {
+    my ($class) = @_;
+    return join('::', __PACKAGE__, 'Semantics');
 }
 
 
@@ -129,7 +132,12 @@ sub G {
 
 sub parse {
     my ($self, $source, $impl) = @_;
+    #
+    # Because of Automatic Semicolon Insertion that may happen at the end,
+    # a space is appended to a copy of the source to be parsed.
+    #
     $self->{programCompleted} = 0;
+    $source .= ' ';
     return $self->SUPER($source, $impl,
                         {
                          callback => \&_eventCallback,
@@ -138,7 +146,6 @@ sub parse {
                          failureargs => [ $self ],
                          end => \&_endCallback,
                          endargs => [ $self ],
-			 keepOriginalSource => 0,
                         });
 }
 
@@ -478,7 +485,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program - ECMAScr
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 SYNOPSIS
 
@@ -498,9 +505,13 @@ This modules returns describes the ECMAScript 262, Edition 5 lexical program gra
 
 =head1 SUBROUTINES/METHODS
 
-=head2 new()
+=head2 make_grammar_content($class)
 
-Instance a new object.
+Returns the grammar. This will be injected in the Program's grammar.
+
+=head2 semantics_package($class)
+
+Class method that returns Program default recce semantics_package. These semantics are adding ruleId to all values, and execute eventually StringLiteral lexical grammar.
 
 =head2 G()
 

@@ -1,13 +1,13 @@
 use strict;
 use warnings FATAL => 'all';
 
-package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::DefaultSemanticsPackage;
+package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics;
 use Data::Float qw//;
 use Scalar::Util qw/blessed/;
 
-# ABSTRACT: ECMAScript 262, Edition 5, lexical string numeric grammar default semantics package
+# ABSTRACT: ECMAScript 262, Edition 5, lexical string numeric grammar default semantics package, using native perl number representations
 
-our $VERSION = '0.006'; # TRIAL VERSION
+our $VERSION = '0.007'; # TRIAL VERSION
 
 
 
@@ -28,13 +28,13 @@ sub host_round {
 
 
 sub host_pos_zero {
-    $_[0]->{_number} = Data::Float::pos_zero;
+    $_[0]->{_number} = Data::Float::pos_zero();
     return $_[0];
 }
 
 
 sub host_pos_inf {
-    $_[0]->{_number} = Data::Float::pos_infinity;
+    $_[0]->{_number} = Data::Float::pos_infinity();
     return $_[0];
 }
 
@@ -106,11 +106,11 @@ __END__
 
 =head1 NAME
 
-MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::DefaultSemanticsPackage - ECMAScript 262, Edition 5, lexical string numeric grammar default semantics package
+MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics - ECMAScript 262, Edition 5, lexical string numeric grammar default semantics package, using native perl number representations
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 DESCRIPTION
 
@@ -130,11 +130,11 @@ Host implementation of rounded $self. Returns $self.
 
 =head2 host_pos_zero($self)
 
-Host implementation of $self setted to positive zero, defaulting to Data::Float::pos_zero. Returns $self.
+Host implementation of $self setted to positive zero, defaulting to Data::Float::pos_zero(). Returns $self.
 
 =head2 host_pos_inf($self)
 
-Host implementation of $self setted to positive infinity, defaulting to Data::Float::pos_infinity. Return $self.
+Host implementation of $self setted to positive infinity, defaulting to Data::Float::pos_infinity(). Return $self.
 
 =head2 host_pow($self, $powobj)
 

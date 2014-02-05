@@ -3,46 +3,23 @@ use warnings FATAL => 'all';
 
 package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::RegularExpressionLiteral;
 use parent qw/MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base/;
-use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::RegularExpressionLiteral::Actions;
-use Carp qw/croak/;
-use Log::Any qw/$log/;
-use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical string grammar written in Marpa BNF
 
-our $VERSION = '0.006'; # TRIAL VERSION
-
+our $VERSION = '0.007'; # TRIAL VERSION
 
 
 #
 # Prevent injection of this grammar to collide with others:
 # ___yy is changed to ___StringLiteral___yy
 #
-our $grammar_source = do {local $/; <DATA>};
-$grammar_source =~ s/___/___RegularExpressionLiteral___/g;
+our $grammar_content = do {local $/; <DATA>};
+$grammar_content =~ s/___/___RegularExpressionLiteral___/g;
 
-sub new {
+
+sub make_grammar_content {
     my ($class) = @_;
-
-    return $class->SUPER($grammar_source, __PACKAGE__);
-}
-
-
-sub parse {
-    my ($self, $source, $impl) = @_;
-    return $self->SUPER($source, $impl,
-	{
-	 #   '_DecimalLiteral$'     => \&_DecimalLiteral,
-	 #   '_HexIntegerLiteral$'  => \&_HexIntegerLiteral,
-	 #   '_OctalIntegerLiteral$'=> \&_OctalIntegerLiteral,
-	 #   '_IdentifierName$'     => \&_IdentifierName
-	});
-}
-
-sub _DecimalLiteral {
-    my ($self, $lexemeHashp, $source, $impl) = @_;
-
-    $self->_NumericLiteralLookhead($lexemeHashp, $source, $impl);
+    return $grammar_content;
 }
 
 
@@ -58,7 +35,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::RegularE
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 SYNOPSIS
 
@@ -74,17 +51,15 @@ version 0.006
 
 =head1 DESCRIPTION
 
-This modules returns describes the ECMAScript 262, Edition 5 lexical string grammar written in Marpa BNF, as of L<http://www.ecma-international.org/publications/standards/Ecma-262.htm>. This module inherits the methods from MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base package.
+This modules describes the ECMAScript 262, Edition 5 regular expression literal grammar written in Marpa BNF, as of L<http://www.ecma-international.org/publications/standards/Ecma-262.htm>.
+
+This module inherits the methods from MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base package.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 new()
+=head2 make_grammar_content($class)
 
-Instance a new object.
-
-=head2 parse($self, $source)
-
-Parse the source given as $source.
+Returns the grammar. This will be injected in the Program's grammar.
 
 =head1 SEE ALSO
 

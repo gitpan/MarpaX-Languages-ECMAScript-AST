@@ -10,7 +10,7 @@ use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Template;
 
 # ABSTRACT: ECMAScript-262, Edition 5, grammar
 
-our $VERSION = '0.006'; # TRIAL VERSION
+our $VERSION = '0.007'; # TRIAL VERSION
 
 
 sub new {
@@ -41,8 +41,7 @@ sub _init {
 	impl => MarpaX::Languages::ECMAScript::AST::Impl->new($stringNumericLiteral->grammar_option(), $stringNumericLiteral->recce_option(), $stringNumericLiteral->G, 1)
     };
 
-    my $patternOptionsp = exists($opts{Pattern}) ? $opts{Pattern} : undef;
-    my $pattern = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern->new($patternOptionsp);
+    my $pattern = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern->new();
     $self->{_pattern} = {
 	grammar => $pattern,
 	impl => MarpaX::Languages::ECMAScript::AST::Impl->new($pattern->grammar_option(), $pattern->recce_option(), $pattern->G, 1)
@@ -96,7 +95,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5 - ECMAScript-262, 
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 SYNOPSIS
 
@@ -157,18 +156,6 @@ Reference to hash containing options for MarpaX::Languages::ECMAScript::AST::Gra
 =item semantics_package
 
 Semantic package providing host implementation of a Number.
-
-=back
-
-=item Pattern
-
-Reference to hash containing options for MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern. These options can be:
-
-=over
-
-=item semantics_package
-
-Semantic package providing host implementation of a Pattern.
 
 =back
 

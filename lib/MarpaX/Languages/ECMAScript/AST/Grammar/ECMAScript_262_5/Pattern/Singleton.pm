@@ -6,7 +6,7 @@ use base 'Class::Singleton';
 
 # ABSTRACT: ECMAScript-262, Edition 5, singleton for pattern grammar
 
-our $VERSION = '0.006'; # TRIAL VERSION
+our $VERSION = '0.007'; # TRIAL VERSION
 
 
 sub _new_instance {
@@ -35,7 +35,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Singleto
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 DESCRIPTION
 

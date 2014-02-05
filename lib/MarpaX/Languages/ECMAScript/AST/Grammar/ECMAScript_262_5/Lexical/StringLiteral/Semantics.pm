@@ -1,7 +1,7 @@
 use strict;
 use warnings FATAL => 'all';
 
-package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral::Actions;
+package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral::Semantics;
 use Carp qw/croak/;
 use constant {
     BS        => "\N{U+0008}",
@@ -17,7 +17,7 @@ use constant {
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical string grammar actions
 
-our $VERSION = '0.006'; # TRIAL VERSION
+our $VERSION = '0.007'; # TRIAL VERSION
 
 
 
@@ -64,11 +64,11 @@ __END__
 
 =head1 NAME
 
-MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral::Actions - ECMAScript 262, Edition 5, lexical string grammar actions
+MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral::Semantics - ECMAScript 262, Edition 5, lexical string grammar actions
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 DESCRIPTION
 

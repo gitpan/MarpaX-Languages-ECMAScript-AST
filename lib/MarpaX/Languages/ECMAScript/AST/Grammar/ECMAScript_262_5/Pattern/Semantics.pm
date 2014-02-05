@@ -1,7 +1,7 @@
 use strict;
 use warnings FATAL => 'all';
 
-package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::DefaultSemanticsPackage;
+package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Semantics;
 use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses;
 use List::Compare::Functional 0.21 qw/get_union_ref/;
@@ -12,7 +12,7 @@ use constant {
 
 # ABSTRACT: ECMAScript 262, Edition 5, pattern grammar default semantics package
 
-our $VERSION = '0.006'; # TRIAL VERSION
+our $VERSION = '0.007'; # TRIAL VERSION
 
 
 sub new {
@@ -413,9 +413,9 @@ sub _QuantifierPrefix_DecimalDigits {
     my ($self, undef, $decimalDigits, undef) = @_;
 
     #
-    # Note: DecimalDigits is a lexeme, default lexeme value is [start,length,value]
+    # Note: DecimalDigits is a string
     #
-    my $i = $decimalDigits->[2];
+    my $i = int($decimalDigits);
     return [$i, $i];
 }
 
@@ -423,9 +423,9 @@ sub _QuantifierPrefix_DecimalDigits_Comma {
     my ($self, undef, $decimalDigits, undef) = @_;
 
     #
-    # Note: DecimalDigits is a lexeme, default lexeme value is [start,length,value]
+    # Note: DecimalDigits is a string
     #
-    my $i = $decimalDigits->[2];
+    my $i = int($decimalDigits);
     return [$i, undef];
 }
 
@@ -433,10 +433,10 @@ sub _QuantifierPrefix_DecimalDigits_DecimalDigits {
     my ($self, undef, $decimalDigits1, undef, $decimalDigits2, undef) = @_;
 
     #
-    # Note: DecimalDigits is a lexeme, default lexeme value is [start,length,value]
+    # Note: DecimalDigits is a string
     #
-    my $i = $decimalDigits1->[2];
-    my $j = $decimalDigits2->[2];
+    my $i = int($decimalDigits1);
+    my $j = int($decimalDigits2);
     return [$i, $j];
 }
 
@@ -700,11 +700,53 @@ sub _DecimalEscape_DecimalIntegerLiteral {
     my ($self, $decimalIntegerLiteral) = @_;
 
     #
-    # Note: DecimalIntegerLiteral is a lexeme, default lexeme value is [start,length,value]
+    # Note: DecimalIntegerLiteral is already an integer
     #
-    my $i = $decimalIntegerLiteral->[2];
+    my $i = $decimalIntegerLiteral;
 
     return $i;
+}
+
+sub _DecimalIntegerLiteral_Zero {
+    my ($self, undef) = @_;
+
+    return 0;
+}
+
+sub _DecimalIntegerLiteral_NonZeroDigit {
+    my ($self, $nonZeroDigit) = @_;
+
+    #
+    # Note: nonZeroDigit is a lexeme, default lexeme value is [start,length,value]
+    #
+    my $i = $nonZeroDigit->[2];
+
+    return $i;
+}
+
+sub _DecimalIntegerLiteral_NonZeroDigit_DecimalDigits {
+    my ($self, $nonZeroDigit, $decimalDigits) = @_;
+
+    #
+    # Note: DecimalDigits is a string
+    #
+    my $s = $nonZeroDigit->[2] . $decimalDigits;
+
+    return int($s);
+}
+
+#
+# Let's return a string that is concatenating the digits
+#
+sub _DecimalDigits {
+    my ($self, @decimalDigit) = @_;
+
+    my $s = '';
+    foreach (@decimalDigit) {
+	$s .= $_->[2];
+    }
+
+    return $s;
 }
 
 sub _CharacterClassEscape {
@@ -970,11 +1012,11 @@ __END__
 
 =head1 NAME
 
-MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::DefaultSemanticsPackage - ECMAScript 262, Edition 5, pattern grammar default semantics package
+MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Semantics - ECMAScript 262, Edition 5, pattern grammar default semantics package
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 DESCRIPTION
 

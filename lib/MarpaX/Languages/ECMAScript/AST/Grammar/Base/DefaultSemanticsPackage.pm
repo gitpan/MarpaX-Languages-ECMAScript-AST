@@ -1,16 +1,16 @@
 use strict;
 use warnings FATAL => 'all';
 
-package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::NumericLiteral::Actions;
+package MarpaX::Languages::ECMAScript::AST::Grammar::Base::DefaultSemanticsPackage;
 
-# ABSTRACT: ECMAScript 262, Edition 5, lexical decimal grammar actions
+# ABSTRACT: ECMAScript 262, Edition 5, default semantics package
 
-our $VERSION = '0.006'; # TRIAL VERSION
+our $VERSION = '0.007'; # TRIAL VERSION
 
 
 
 sub new {
-    my ($class) = @_;
+    my $class = shift;
     my $self = {};
     bless($self, $class);
     return $self;
@@ -26,15 +26,15 @@ __END__
 
 =head1 NAME
 
-MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::NumericLiteral::Actions - ECMAScript 262, Edition 5, lexical decimal grammar actions
+MarpaX::Languages::ECMAScript::AST::Grammar::Base::DefaultSemanticsPackage - ECMAScript 262, Edition 5, default semantics package
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 DESCRIPTION
 
-This modules give the actions associated to ECMAScript_262_5 lexical numeric grammar.
+This modules give the default semantics package associated to any ECMAScript_262_5 lexical grammar.
 
 =head2 new($class)
 
