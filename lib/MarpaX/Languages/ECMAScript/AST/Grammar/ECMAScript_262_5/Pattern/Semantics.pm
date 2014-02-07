@@ -12,7 +12,7 @@ use constant {
 
 # ABSTRACT: ECMAScript 262, Edition 5, pattern grammar default semantics package
 
-our $VERSION = '0.007'; # TRIAL VERSION
+our $VERSION = '0.008'; # TRIAL VERSION
 
 
 sub new {
@@ -1016,7 +1016,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Semantic
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 DESCRIPTION
 
@@ -1029,6 +1029,8 @@ Instantiate a new object. The value will be a perl subroutine closure that retur
 It will be the responsability of the caller to coerce back into host's representations of array and strings.
 
 The perl subroutine closure will have four parameters: $str, $index, $multiline and $ignoreCase:
+
+=over
 
 =item $str
 

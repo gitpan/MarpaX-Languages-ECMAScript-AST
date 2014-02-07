@@ -17,6 +17,7 @@ my @modules = qw(
   CPAN::Meta::Requirements
   Carp
   Class::Singleton
+  Data::Compare
   Data::Dumper
   Data::Float
   Digest::MD4
@@ -39,6 +40,7 @@ my @modules = qw(
   Module::Util
   SUPER
   Scalar::Util
+  Sereal
   Test::Differences
   Test::More
   base

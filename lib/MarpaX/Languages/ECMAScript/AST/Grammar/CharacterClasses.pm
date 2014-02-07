@@ -7,7 +7,7 @@ use Encode qw/decode/;
 
 # ABSTRACT: ECMAScript, character classes
 
-our $VERSION = '0.007'; # TRIAL VERSION
+our $VERSION = '0.008'; # TRIAL VERSION
 
 
 our @EXPORT_OK = qw/
@@ -66,6 +66,7 @@ IsSourceCharacter
 IsSourceCharacterButNotLineTerminator
 IsSourceCharacterButNotOneOfBackslashOrRbracketOrMinus
 IsSourceCharacterButNotOneOfDquoteOrBackslashOrLineTerminator
+IsSourceCharacterButNotOneOfDquoteOrBackslashOrU0000ThroughU001F
 IsSourceCharacterButNotOneOfEscapeCharacterOrLineTerminator
 IsSourceCharacterButNotOneOfSlashOrStar
 IsSourceCharacterButNotOneOfSlashOrStarOrLineTerminator
@@ -79,6 +80,7 @@ IsStar
 Ist
 IsTAB
 Isu
+IsU0000ThroughU001F
 IsUnderscore
 IsUnicodeCombiningMark
 IsUnicodeConnectorPunctuation
@@ -354,6 +356,15 @@ END
 }
 
 
+sub IsSourceCharacterButNotOneOfDquoteOrBackslashOrU0000ThroughU001F { return <<END;
++MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsSourceCharacter
+-MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsDquote
+-MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsBackslash
+-MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsU0000ThroughU001F
+END
+}
+
+
 sub IsSourceCharacterButNotOneOfSlashOrStar { return <<END;
 +MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsSourceCharacter
 -MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses::IsSlash
@@ -429,6 +440,12 @@ END
 
 sub IsUnicodeConnectorPunctuation { return <<END;
 +utf8::Pc
+END
+}
+
+
+sub IsU0000ThroughU001F { return <<END;
+0000\t001F
 END
 }
 
@@ -835,7 +852,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses - ECMAScript, char
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 SYNOPSIS
 
@@ -935,6 +952,8 @@ Return an array reference of characters composing PS
 
 =head2 IsSourceCharacterButNotStarOrLineTerminator()
 
+=head2 IsSourceCharacterButNotOneOfDquoteOrBackslashOrU0000ThroughU001F()
+
 =head2 IsSourceCharacterButNotOneOfSlashOrStar()
 
 =head2 IsSourceCharacterButNotSlash()
@@ -956,6 +975,8 @@ Return an array reference of characters composing LineTerminator
 =head2 IsUnicodeDigit()
 
 =head2 IsUnicodeConnectorPunctuation()
+
+=head2 IsU0000ThroughU001F()
 
 =head2 IsSourceCharacterButNotOneOfDquoteOrBackslashOrLineTerminator()
 

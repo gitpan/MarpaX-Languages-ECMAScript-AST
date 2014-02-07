@@ -7,7 +7,7 @@ use Scalar::Util qw/blessed/;
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical string numeric grammar default semantics package, using native perl number representations
 
-our $VERSION = '0.007'; # TRIAL VERSION
+our $VERSION = '0.008'; # TRIAL VERSION
 
 
 
@@ -110,7 +110,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLite
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 DESCRIPTION
 

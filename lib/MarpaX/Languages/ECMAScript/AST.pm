@@ -24,7 +24,7 @@ our $CACHE = CHI->new(driver => 'File',
                       namespace => 'cache',
 		      max_key_length => 32);
 
-our $VERSION = '0.007'; # TRIAL VERSION
+our $VERSION = '0.008'; # TRIAL VERSION
 our $CURRENTVERSION;
 {
   #
@@ -227,11 +227,15 @@ sub template {
 # ----------------------------------------------------------------------------------------
 
 
+# ----------------------------------------------------------------------------------------
+
 sub stringNumericLiteral {
   my ($self) = @_;
 
   return $self->{_grammar}->stringNumericLiteral;
 }
+
+# ----------------------------------------------------------------------------------------
 
 
 sub pattern {
@@ -239,6 +243,26 @@ sub pattern {
 
   return $self->{_grammar}->pattern;
 }
+
+# ----------------------------------------------------------------------------------------
+
+
+sub JSON {
+  my ($self) = @_;
+
+  return $self->{_grammar}->JSON;
+}
+
+# ----------------------------------------------------------------------------------------
+
+
+sub URI {
+  my ($self) = @_;
+
+  return $self->{_grammar}->URI;
+}
+
+# ----------------------------------------------------------------------------------------
 
 
 1;
@@ -255,7 +279,7 @@ MarpaX::Languages::ECMAScript::AST - Translate a ECMAScript source to an AST
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 SYNOPSIS
 
@@ -373,6 +397,14 @@ Return the generic stringNumericLiteral for this grammar.
 =head2 pattern($self)
 
 Return the generic Pattern for this grammar.
+
+=head2 JSON($self)
+
+Return the generic JSON for this grammar.
+
+=head2 URI($self)
+
+Return the generic URI for this grammar.
 
 =head1 SEE ALSO
 

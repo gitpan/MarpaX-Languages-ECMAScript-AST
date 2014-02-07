@@ -8,7 +8,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, grammars base package
 
-our $VERSION = '0.007'; # TRIAL VERSION
+our $VERSION = '0.008'; # TRIAL VERSION
 
 
 sub new {
@@ -33,7 +33,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base - ECMAScript
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 SYNOPSIS
 

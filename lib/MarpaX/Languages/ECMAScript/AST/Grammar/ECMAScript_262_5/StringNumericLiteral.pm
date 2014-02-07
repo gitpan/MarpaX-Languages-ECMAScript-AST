@@ -3,14 +3,13 @@ use warnings FATAL => 'all';
 
 package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral;
 use parent qw/MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base/;
-use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::Singleton;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses;
 use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, string numeric literal grammar written in Marpa BNF
 
-our $VERSION = '0.007'; # TRIAL VERSION
+our $VERSION = '0.008'; # TRIAL VERSION
 
 
 #
@@ -18,23 +17,13 @@ our $VERSION = '0.007'; # TRIAL VERSION
 #
 our $grammar_content = do {local $/; <DATA>};
 
-our $singleton = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::Singleton->instance(
-    MarpaX::Languages::ECMAScript::AST::Impl->new
-    (
-     __PACKAGE__->make_grammar_option('ECMAScript-262-5'),
-     undef,                                   # $recceOptionsHashp
-     undef,                                   # $cachedG
-     1                                        # $noR
-    )->grammar
-    );
-
 
 sub new {
     my ($class, $optionsp) = @_;
 
     $optionsp //= {};
 
-    my $semantics_package = exists($optionsp->{semantics_package}) ? $optionsp->{semantics_package} : __PACKAGE__ . '::NativeNumberSemantics';
+    my $semantics_package = exists($optionsp->{semantics_package}) ? $optionsp->{semantics_package} : join('::', $class, 'NativeNumberSemantics');
 
     my $self = $class->SUPER();
 
@@ -65,11 +54,6 @@ sub recce_option {
     $default->{semantics_package} = $self->{_semantics_package};
 
     return $default;
-}
-
-
-sub G {
-    return $singleton->G;
 }
 
 #
@@ -174,7 +158,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLite
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 SYNOPSIS
 
@@ -213,10 +197,6 @@ Returns the grammar. This will be injected in the Program's grammar.
 =head2 recce_option($self)
 
 Returns option for Marpa::R2::Scanless::R->new(), returned as a reference to a hash.
-
-=head2 G()
-
-Cached Marpa::R2::Scanless::G compiled grammar.
 
 =head1 SEE ALSO
 

@@ -3,7 +3,7 @@ NAME
     AST
 
 VERSION
-    version 0.007
+    version 0.008
 
 SYNOPSIS
         use strict;
@@ -106,6 +106,12 @@ SUBROUTINES/METHODS
 
   pattern($self)
     Return the generic Pattern for this grammar.
+
+  JSON($self)
+    Return the generic JSON for this grammar.
+
+  URI($self)
+    Return the generic URI for this grammar.
 
 SEE ALSO
     Log::Any

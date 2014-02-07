@@ -11,19 +11,18 @@ use warnings FATAL => 'all';
 
 package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program;
 use parent qw/MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base/;
-use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Singleton;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Semantics;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::RegularExpressionLiteral;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::NumericLiteral;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses;
 use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
-use Log::Any qw/$log/;
+#use Log::Any qw/$log/;
 use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical program grammar written in Marpa BNF
 
-our $VERSION = '0.007'; # TRIAL VERSION
+our $VERSION = '0.008'; # TRIAL VERSION
 
 our $WhiteSpace        = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsWhiteSpace}])/;
 our $LineTerminator    = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsLineTerminator}])/;
@@ -95,16 +94,6 @@ $grammar_content .= $StringLiteral->extract;
 $grammar_content .= $NumericLiteral->extract;
 $grammar_content .= $RegularExpressionLiteral->extract;
 
-our $singleton = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Singleton->instance(
-    MarpaX::Languages::ECMAScript::AST::Impl->new
-    (
-     __PACKAGE__->make_grammar_option('ECMAScript-262-5'),
-     undef,                                   # $recceOptionsHashp
-     undef,                                   # $cachedG
-     1                                        # $noR
-    )->grammar
-    );
-
 #
 # For convenience in the IDENTIFIER$ lexeme callback, we merge Keyword, FutureReservedWord, NullLiteral, BooleanLiteral into
 # a single hash ReservedWord.
@@ -121,12 +110,7 @@ sub make_grammar_content {
 
 sub make_semantics_package {
     my ($class) = @_;
-    return join('::', __PACKAGE__, 'Semantics');
-}
-
-
-sub G {
-    return $singleton->G;
+    return join('::', $class, 'Semantics');
 }
 
 
@@ -485,7 +469,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program - ECMAScr
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 SYNOPSIS
 
@@ -512,10 +496,6 @@ Returns the grammar. This will be injected in the Program's grammar.
 =head2 semantics_package($class)
 
 Class method that returns Program default recce semantics_package. These semantics are adding ruleId to all values, and execute eventually StringLiteral lexical grammar.
-
-=head2 G()
-
-Cached Marpa::R2::Scanless::G compiled grammar.
 
 =head2 parse($self, $source, $impl)
 

@@ -3,7 +3,6 @@ use warnings FATAL => 'all';
 
 package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern;
 use parent qw/MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base/;
-use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Singleton;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Semantics;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses;
 use SUPER;
@@ -12,7 +11,7 @@ use Scalar::Util qw/blessed/;
 
 # ABSTRACT: ECMAScript-262, Edition 5, pattern grammar written in Marpa BNF
 
-our $VERSION = '0.007'; # TRIAL VERSION
+our $VERSION = '0.008'; # TRIAL VERSION
 
 
 #
@@ -20,23 +19,13 @@ our $VERSION = '0.007'; # TRIAL VERSION
 #
 our $grammar_content = do {local $/; <DATA>};
 
-our $singleton = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Singleton->instance(
-    MarpaX::Languages::ECMAScript::AST::Impl->new
-    (
-     __PACKAGE__->make_grammar_option('ECMAScript-262-5'),
-     undef,                                   # $recceOptionsHashp
-     undef,                                   # $cachedG
-     1                                        # $noR
-    )->grammar
-    );
-
 
 sub new {
     my ($class, $optionsp) = @_;
 
     $optionsp //= {};
 
-    my $semantics_package = exists($optionsp->{semantics_package}) ? $optionsp->{semantics_package} : __PACKAGE__ . '::Semantics';
+    my $semantics_package = exists($optionsp->{semantics_package}) ? $optionsp->{semantics_package} : join('::', $class, 'Semantics');
 
     my $self = $class->SUPER();
 
@@ -78,11 +67,6 @@ sub recce_option {
     $default->{semantics_package} = $self->{_semantics_package};
 
     return $default;
-}
-
-
-sub G {
-    return $singleton->G;
 }
 
 
@@ -155,7 +139,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern - ECMAScr
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 SYNOPSIS
 
@@ -183,7 +167,7 @@ $optionsp is a reference to hash that may contain the following key/value pair:
 
 =item semantics_package
 
-As per Marpa::R2, The semantics package is used when resolving action names to fully qualified Perl names. This package must support and behave as documented in the DefaultSemanticsPackage (c.f. SEE ALSO).
+As per Marpa::R2, The semantics package is used when resolving action names to fully qualified Perl names. This package must support and behave as documented in the Semantics package (c.f. SEE ALSO).
 
 =back
 
@@ -199,10 +183,6 @@ Returns current lexer left parenthesis offsets of captures.
 
 Returns option for Marpa::R2::Scanless::R->new(), returned as a reference to a hash.
 
-=head2 G()
-
-Cached Marpa::R2::Scanless::G compiled grammar.
-
 =head2 parse($self, $source, $impl)
 
 Parse the source given as $source using implementation $impl.
@@ -217,7 +197,7 @@ This method is explicitely setting a localized MarpaX::Languages::ECMAScript::AS
 
 L<MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Base>
 
-L<MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::DefaultSemanticsPackage>
+L<MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Semantics>
 
 =head1 AUTHOR
 

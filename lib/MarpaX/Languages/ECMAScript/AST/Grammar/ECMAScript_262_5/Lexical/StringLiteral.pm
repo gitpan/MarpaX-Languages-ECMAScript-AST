@@ -7,7 +7,7 @@ use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::Stri
 
 # ABSTRACT: ECMAScript-262, Edition 5, string literal grammar written in Marpa BNF
 
-our $VERSION = '0.007'; # TRIAL VERSION
+our $VERSION = '0.008'; # TRIAL VERSION
 
 
 #
@@ -26,7 +26,7 @@ sub make_grammar_content {
 
 sub make_semantics_package {
     my ($class) = @_;
-    return join('::', $class, 'DefaultSemanticsPackage');
+    return join('::', $class, 'Semantics');
 }
 
 
@@ -42,7 +42,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLi
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 SYNOPSIS
 

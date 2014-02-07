@@ -5,11 +5,11 @@ package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral;
 
 our $StringLiteral = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLiteral->new();
-our $StringLiteralImpl = MarpaX::Languages::ECMAScript::AST::Impl->new($StringLiteral->grammar_option(), $StringLiteral->recce_option(), undef, 1);
+our $StringLiteralImpl = MarpaX::Languages::ECMAScript::AST::Impl->new($StringLiteral->grammar_option(), $StringLiteral->recce_option());
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical expressions grammar actions
 
-our $VERSION = '0.007'; # TRIAL VERSION
+our $VERSION = '0.008'; # TRIAL VERSION
 
 use constant AST => 'MarpaX::Languages::ECMAScript::AST';
 
@@ -61,7 +61,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Semantic
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 DESCRIPTION
 
