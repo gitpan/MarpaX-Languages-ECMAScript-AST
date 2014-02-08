@@ -10,7 +10,7 @@ use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 
 # ABSTRACT: ECMAScript, grammars base package
 
-our $VERSION = '0.008'; # TRIAL VERSION
+our $VERSION = '0.009'; # TRIAL VERSION
 
 #
 # Note: because this module is usually subclasses, internal methods are called
@@ -340,7 +340,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::Base - ECMAScript, grammars base pa
 
 =head1 VERSION
 
-version 0.008
+version 0.009
 
 =head1 SYNOPSIS
 

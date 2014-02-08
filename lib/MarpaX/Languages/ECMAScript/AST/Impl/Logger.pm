@@ -9,7 +9,7 @@ use diagnostics;
 use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 use Log::Any;
 
-our $VERSION = '0.008'; # TRIAL VERSION
+our $VERSION = '0.009'; # TRIAL VERSION
 
 sub BEGIN {
     #
@@ -74,7 +74,7 @@ MarpaX::Languages::ECMAScript::AST::Impl::Logger - Log::Any implementation on to
 
 =head1 VERSION
 
-version 0.008
+version 0.009
 
 =head1 DESCRIPTION
 

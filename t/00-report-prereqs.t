@@ -40,6 +40,7 @@ my @modules = qw(
   Module::Util
   SUPER
   Scalar::Util
+  Scalar::Util::Numeric
   Sereal
   Test::Differences
   Test::More

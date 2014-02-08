@@ -8,7 +8,7 @@ package MarpaX::Languages::ECMAScript::AST::Grammar;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5;
 use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 
-our $VERSION = '0.008'; # TRIAL VERSION
+our $VERSION = '0.009'; # TRIAL VERSION
 
 
 sub new {
@@ -85,7 +85,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar - ECMAScript grammar written in Marp
 
 =head1 VERSION
 
-version 0.008
+version 0.009
 
 =head1 SYNOPSIS
 

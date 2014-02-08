@@ -22,7 +22,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical program grammar written in Marpa BNF
 
-our $VERSION = '0.008'; # TRIAL VERSION
+our $VERSION = '0.009'; # TRIAL VERSION
 
 our $WhiteSpace        = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsWhiteSpace}])/;
 our $LineTerminator    = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsLineTerminator}])/;
@@ -140,6 +140,8 @@ sub _eventCallback {
   # $pos is the exact position where SLIF stopped because of an event
   #
   my $rc = $pos;
+  my %lastLexeme = ();
+  my $lastLexemeDoneb = 0;
 
   foreach (@{$impl->events()}) {
     my ($name) = @{$_};
@@ -169,8 +171,10 @@ sub _eventCallback {
       }
     }
     elsif ($name eq 'IDENTIFIER$') {
-	my %lastLexeme = ();
-	$self->getLastLexeme(\%lastLexeme, $impl);
+	if (! $lastLexemeDoneb) {
+	    $self->getLastLexeme(\%lastLexeme, $impl);
+	    $lastLexemeDoneb = 1;
+	}
 	if (exists($ReservedWord{$lastLexeme{value}})) {
 	    SyntaxError(error => "Identifier $lastLexeme{value} is a reserved word");
 	}
@@ -188,8 +192,10 @@ sub _eventCallback {
       #
       # In the AST, we explicitely associate the ';' to the missing semicolon
       #
-	my %lastLexeme = ();
-	$self->getLastLexeme(\%lastLexeme, $impl);
+	if (! $lastLexemeDoneb) {
+	    $self->getLastLexeme(\%lastLexeme, $impl);
+	    $lastLexemeDoneb = 1;
+	}
 	my $Slength = $self->_preSLength($source, $rc, $impl);
 	$self->_insertInvisibleSemiColon($impl, $rc, $Slength);
 	$rc += $Slength;
@@ -198,8 +204,10 @@ sub _eventCallback {
     # ^PLUSPLUS_POSTFIX, ^MINUSMINUS_POSTFIX
     # --------------------------------------
     elsif ($name eq '^PLUSPLUS_POSTFIX' || $name eq '^MINUSMINUS_POSTFIX') {
-      my %lastLexeme = ();
-      $self->getLastLexeme(\%lastLexeme, $impl);
+	if (! $lastLexemeDoneb) {
+	    $self->getLastLexeme(\%lastLexeme, $impl);
+	    $lastLexemeDoneb = 1;
+	}
       my $postLineTerminatorPos = $lastLexeme{start} + $lastLexeme{length};
       my $postLineTerminatorLength = $self->_postLineTerminatorLength($source, $postLineTerminatorPos, $impl);
       if ($postLineTerminatorLength > 0) {
@@ -469,7 +477,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program - ECMAScr
 
 =head1 VERSION
 
-version 0.008
+version 0.009
 
 =head1 SYNOPSIS
 

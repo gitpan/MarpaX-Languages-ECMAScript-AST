@@ -39,6 +39,7 @@ my %WriteMakefileArgs = (
     "Module::Util" => 0,
     "SUPER" => 0,
     "Scalar::Util" => 0,
+    "Scalar::Util::Numeric" => 0,
     "Sereal" => 0,
     "base" => 0,
     "constant" => 0,
@@ -60,7 +61,7 @@ my %WriteMakefileArgs = (
     "Test::Differences" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.008",
+  "VERSION" => "0.009",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -94,6 +95,7 @@ my %FallbackPrereqs = (
   "Module::Util" => 0,
   "SUPER" => 0,
   "Scalar::Util" => 0,
+  "Scalar::Util::Numeric" => 0,
   "Sereal" => 0,
   "Test::Differences" => 0,
   "Test::More" => 0,

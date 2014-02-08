@@ -6,7 +6,7 @@ use parent qw/MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Bas
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical string grammar written in Marpa BNF
 
-our $VERSION = '0.008'; # TRIAL VERSION
+our $VERSION = '0.009'; # TRIAL VERSION
 
 
 #
@@ -35,7 +35,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::RegularE
 
 =head1 VERSION
 
-version 0.008
+version 0.009
 
 =head1 SYNOPSIS
 

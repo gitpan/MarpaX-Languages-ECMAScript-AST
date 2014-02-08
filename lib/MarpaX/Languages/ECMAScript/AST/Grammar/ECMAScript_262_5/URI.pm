@@ -9,7 +9,7 @@ our $grammar_content = do {local $/; <DATA>};
 
 # ABSTRACT: ECMAScript-262, Edition 5, URI grammar
 
-our $VERSION = '0.008'; # TRIAL VERSION
+our $VERSION = '0.009'; # TRIAL VERSION
 
 
 
@@ -31,7 +31,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::URI - ECMAScript-
 
 =head1 VERSION
 
-version 0.008
+version 0.009
 
 =head1 SYNOPSIS
 
