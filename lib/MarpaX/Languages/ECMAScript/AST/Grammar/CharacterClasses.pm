@@ -7,7 +7,7 @@ use Encode qw/decode/;
 
 # ABSTRACT: ECMAScript, character classes
 
-our $VERSION = '0.010'; # TRIAL VERSION
+our $VERSION = '0.011'; # VERSION
 
 
 our @EXPORT_OK = qw/
@@ -852,7 +852,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::CharacterClasses - ECMAScript, char
 
 =head1 VERSION
 
-version 0.010
+version 0.011
 
 =head1 SYNOPSIS
 

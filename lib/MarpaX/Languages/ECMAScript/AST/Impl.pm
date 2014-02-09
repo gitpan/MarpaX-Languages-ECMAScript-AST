@@ -10,7 +10,7 @@ use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 use MarpaX::Languages::ECMAScript::AST::Impl::Logger;
 use MarpaX::Languages::ECMAScript::AST::Impl::Singleton;
 
-our $VERSION = '0.010'; # TRIAL VERSION
+our $VERSION = '0.011'; # VERSION
 
 our $MARPA_TRACE_FILE_HANDLE;
 our $MARPA_TRACE_BUFFER;
@@ -216,7 +216,7 @@ MarpaX::Languages::ECMAScript::AST::Impl - Implementation of Marpa's interface
 
 =head1 VERSION
 
-version 0.010
+version 0.011
 
 =head1 SYNOPSIS
 

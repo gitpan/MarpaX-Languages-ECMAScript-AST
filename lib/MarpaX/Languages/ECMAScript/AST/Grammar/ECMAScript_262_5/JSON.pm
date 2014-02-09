@@ -9,7 +9,7 @@ our $grammar_content = do {local $/; <DATA>};
 
 # ABSTRACT: ECMAScript-262, Edition 5, JSON grammar
 
-our $VERSION = '0.010'; # TRIAL VERSION
+our $VERSION = '0.011'; # VERSION
 
 
 
@@ -31,7 +31,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::JSON - ECMAScript
 
 =head1 VERSION
 
-version 0.010
+version 0.011
 
 =head1 SYNOPSIS
 

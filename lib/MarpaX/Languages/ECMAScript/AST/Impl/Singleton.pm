@@ -10,7 +10,7 @@ use Log::Any qw/$log/;
 
 # ABSTRACT: Singleton hosting all the grammar precompiled Marpa::R2::Scanless::G objects
 
-our $VERSION = '0.010'; # TRIAL VERSION
+our $VERSION = '0.011'; # VERSION
 
 
 sub _new_instance {
@@ -25,14 +25,11 @@ sub G {
 
     $grammarOptionsHashp //= {};
 
-    $log->debugf('01: %d keys', scalar(keys %{$self->{_G}}));
-
     #
     # Search the key
     #
     my $key = undef;
     foreach (keys %{$self->{_G}}) {
-      $log->debugf('02: %d keys', scalar(keys %{$self->{_G}}));
       my $thisKey = $_;
       my $thisOptionsHashp = decode_sereal($thisKey);
       my $c = new Data::Compare($grammarOptionsHashp, $thisOptionsHashp);
@@ -45,7 +42,7 @@ sub G {
     # Create a new key if necessary
     #
     if (! defined($key)) {
-      $log->debugf('03: Creating key');
+      $log->debugf('Creating grammar key');
       $key = encode_sereal($grammarOptionsHashp);
     }
 
@@ -53,13 +50,11 @@ sub G {
       #
       # Create the grammar object
       #
-      $log->debugf('04: Creating grammar object');
+      $log->debugf('Creating grammar object');
       $self->{_G}->{$key} = Marpa::R2::Scanless::G->new($grammarOptionsHashp);
     } else {
-      $log->debugf('05: Found grammar object');
+      $log->debugf('Found cached grammar object');
     }
-
-    $log->debugf('06: %d keys', scalar(keys %{$self->{_G}}));
 
     return $self->{_G}->{$key};
 }
@@ -78,7 +73,7 @@ MarpaX::Languages::ECMAScript::AST::Impl::Singleton - Singleton hosting all the 
 
 =head1 VERSION
 
-version 0.010
+version 0.011
 
 =head1 DESCRIPTION
 
