@@ -36,6 +36,7 @@ my %WriteMakefileArgs = (
     "List::Compare::Functional" => "0.21",
     "Log::Any" => 0,
     "Marpa::R2" => "2.078000",
+    "Math::BigFloat" => 0,
     "Module::Util" => 0,
     "SUPER" => 0,
     "Scalar::Util" => 0,
@@ -57,11 +58,10 @@ my %WriteMakefileArgs = (
     "IO::Handle" => 0,
     "IPC::Open3" => 0,
     "List::Util" => 0,
-    "Math::BigFloat" => 0,
     "Test::Differences" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.009",
+  "VERSION" => "0.010",
   "test" => {
     "TESTS" => "t/*.t"
   }
