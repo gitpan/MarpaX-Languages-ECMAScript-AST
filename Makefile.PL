@@ -31,7 +31,7 @@ my %WriteMakefileArgs = (
     "Exception::Class" => 0,
     "Exporter" => 0,
     "File::Basename" => 0,
-    "File::HomeDir" => 0,
+    "File::HomeDir" => "0.93",
     "File::Spec" => 0,
     "List::Compare::Functional" => "0.21",
     "Log::Any" => 0,
@@ -61,7 +61,7 @@ my %WriteMakefileArgs = (
     "Test::Differences" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.011",
+  "VERSION" => "0.012",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -81,7 +81,7 @@ my %FallbackPrereqs = (
   "Exporter" => 0,
   "ExtUtils::MakeMaker" => 0,
   "File::Basename" => 0,
-  "File::HomeDir" => 0,
+  "File::HomeDir" => "0.93",
   "File::Spec" => 0,
   "File::Spec::Functions" => 0,
   "File::Temp" => 0,

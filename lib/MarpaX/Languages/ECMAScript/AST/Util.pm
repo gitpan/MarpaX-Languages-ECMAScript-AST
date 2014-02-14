@@ -11,7 +11,7 @@ use Data::Dumper;
 # Marpa follows Unicode recommendation, i.e. perl's \R, that cannot be in a character class
 our $NEWLINE_REGEXP = qr/(?>\x0D\x0A|\v)/;
 
-our $VERSION = '0.011'; # VERSION
+our $VERSION = '0.012'; # VERSION
 # CONTRIBUTORS
 
 our @EXPORT_OK = qw/whoami whowasi traceAndUnpack showLineAndCol lineAndCol lastCompleted startAndLength lastLexemeSpan/;
@@ -139,7 +139,7 @@ MarpaX::Languages::ECMAScript::AST::Util - ECMAScript Translation to AST - Class
 
 =head1 VERSION
 
-version 0.011
+version 0.012
 
 =head1 SYNOPSIS
 

@@ -9,7 +9,7 @@ our $StringLiteralImpl = MarpaX::Languages::ECMAScript::AST::Impl->new($StringLi
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical expressions grammar actions
 
-our $VERSION = '0.011'; # VERSION
+our $VERSION = '0.012'; # VERSION
 
 use constant AST => 'MarpaX::Languages::ECMAScript::AST';
 
@@ -61,7 +61,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Semantic
 
 =head1 VERSION
 
-version 0.011
+version 0.012
 
 =head1 DESCRIPTION
 

@@ -8,7 +8,7 @@ package MarpaX::Languages::ECMAScript::AST;
 use MarpaX::Languages::ECMAScript::AST::Grammar qw//;
 use Digest::MD4 qw/md4_hex/;
 use CHI;
-use File::HomeDir;
+use File::HomeDir 0.93;
 use version 0.77;
 use Log::Any qw/$log/;
 use Module::Util qw/find_installed/;
@@ -24,7 +24,7 @@ our $CACHE = CHI->new(driver => 'File',
                       namespace => 'cache',
 		      max_key_length => 32);
 
-our $VERSION = '0.011'; # VERSION
+our $VERSION = '0.012'; # VERSION
 our $CURRENTVERSION;
 {
   #
@@ -279,7 +279,7 @@ MarpaX::Languages::ECMAScript::AST - Translate a ECMAScript source to an AST
 
 =head1 VERSION
 
-version 0.011
+version 0.012
 
 =head1 SYNOPSIS
 

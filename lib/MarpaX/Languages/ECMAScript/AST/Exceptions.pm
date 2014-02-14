@@ -5,7 +5,7 @@ package MarpaX::Languages::ECMAScript::AST::Exceptions;
 
 # ABSTRACT: ECMAScript, Exceptions definition
 
-our $VERSION = '0.011'; # VERSION
+our $VERSION = '0.012'; # VERSION
 
 use Exception::Class (
     'MarpaX::Languages::ECMAScript::AST::Exception::InternalError' =>
@@ -35,7 +35,7 @@ MarpaX::Languages::ECMAScript::AST::Exceptions - ECMAScript, Exceptions definiti
 
 =head1 VERSION
 
-version 0.011
+version 0.012
 
 =head1 AUTHOR
 

@@ -15,7 +15,7 @@ our $NAN      = have_nan()         ? Data::Float::nan()          : Math::BigFloa
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical string numeric grammar default semantics package, using native perl representations
 
-our $VERSION = '0.011'; # VERSION
+our $VERSION = '0.012'; # VERSION
 
 
 
@@ -196,7 +196,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLite
 
 =head1 VERSION
 
-version 0.011
+version 0.012
 
 =head1 DESCRIPTION
 
