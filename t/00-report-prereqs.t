@@ -44,9 +44,11 @@ my @modules = qw(
   Sereal
   Test::Differences
   Test::More
+  Unicode::Normalize
   base
   constant
   diagnostics
+  feature
   parent
   perl
   strict

@@ -6,7 +6,7 @@ use parent qw/MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Bas
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical string grammar written in Marpa BNF
 
-our $VERSION = '0.012'; # VERSION
+our $VERSION = '0.013'; # TRIAL VERSION
 
 
 #
@@ -35,7 +35,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::RegularE
 
 =head1 VERSION
 
-version 0.012
+version 0.013
 
 =head1 SYNOPSIS
 
@@ -87,7 +87,7 @@ __DATA__
 # tokens, line terminators, comments, or white space.
 #
 :start ::= __RegularExpressionLiteral
-lexeme default = action => [start,length,value]
+lexeme default = action => [start,length,value] forgiving => 1
 
 #
 # DO NOT REMOVE NOR MODIFY THIS LINE

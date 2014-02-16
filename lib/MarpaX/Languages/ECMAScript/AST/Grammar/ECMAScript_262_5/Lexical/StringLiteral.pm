@@ -7,7 +7,7 @@ use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::Stri
 
 # ABSTRACT: ECMAScript-262, Edition 5, string literal grammar written in Marpa BNF
 
-our $VERSION = '0.012'; # VERSION
+our $VERSION = '0.013'; # TRIAL VERSION
 
 
 #
@@ -42,7 +42,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLi
 
 =head1 VERSION
 
-version 0.012
+version 0.013
 
 =head1 SYNOPSIS
 
@@ -99,6 +99,7 @@ __DATA__
 #
 :start ::= __StringLiteral
 :default ::= action => ::first
+lexeme default = forgiving => 1
 
 #
 # DO NOT REMOVE NOR MODIFY THIS LINE

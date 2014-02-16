@@ -5,14 +5,25 @@ package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::
 use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses;
 use List::Compare::Functional 0.21 qw/get_union_ref/;
+use Unicode::Normalize qw/NFD NFC/;
+
 use constant {
   ASSERTION_IS_NOT_MATCHER => 0,
   ASSERTION_IS_MATCHER     => 1
 };
+use constant {
+    ORD_a => ord('a'),
+    ORD_z => ord('z'),
+    ORD_A => ord('A'),
+    ORD_Z => ord('Z'),
+    ORD_0 => ord('0'),
+    ORD_9 => ord('9'),
+    ORD__ => ord('_'),
+};
 
 # ABSTRACT: ECMAScript 262, Edition 5, pattern grammar default semantics package
 
-our $VERSION = '0.012'; # VERSION
+our $VERSION = '0.013'; # TRIAL VERSION
 
 
 sub new {
@@ -34,6 +45,7 @@ sub lparen {
 # on perl.
 #
 our @LINETERMINATOR = @{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::LineTerminator()};
+our %HASHLINETERMINATOR = map {$_ => 1} @LINETERMINATOR;
 our @WHITESPACE = @{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::WhiteSpace()};
 
 sub _Pattern_Disjunction {
@@ -45,9 +57,25 @@ sub _Pattern_Disjunction {
 	#
 	# Note: $str is a true perl string, $index is a true perl scalar
 	#
-	my ($str, $index, $multiline, $ignoreCase) = @_;
+	my ($str, $index, $multiline, $ignoreCase, $upperCase) = @_;
 	$multiline //= 0;
 	$ignoreCase //= 0;
+	$upperCase //= sub {
+	    if ($^V ge v5.12.0) {
+		#
+		# C.f. http://www.effectiveperlprogramming.com/2012/02/fold-cases-properly/
+		# Please note that we really want only the upper case version as per
+		# ECMAScript specification
+		#
+		use feature 'unicode_strings';
+		return uc($_[0]);
+	    } else {
+		#
+		# C.f. uc from Unicode::Tussle
+		#
+		return NFC(uc(NFD($_[0])));
+	    }
+	};
 	#
 	# We localize input, input length, mutiline and ignoreCase
 	#
@@ -55,6 +83,7 @@ sub _Pattern_Disjunction {
 	local $MarpaX::Languages::ECMAScript::AST::Pattern::inputLength = length($str);
 	local $MarpaX::Languages::ECMAScript::AST::Pattern::multiline = $multiline;
 	local $MarpaX::Languages::ECMAScript::AST::Pattern::ignoreCase = $ignoreCase;
+	local $MarpaX::Languages::ECMAScript::AST::Pattern::upperCase = $upperCase;
 
 	my $c = sub {
 	    my ($state) = @_;
@@ -205,7 +234,7 @@ sub _Term_Atom_Quantifier {
     my $m = $atom;
     my ($min, $max, $greedy) = @{$quantifier};
     if (defined($max) && $max < $min) {
-      SyntaxError("$max < $min");
+      SyntaxError("Bad quantifier {$min,$max} in regular expression");
     }
     my $hashp = $self->_parenIndexAndCount();
 
@@ -223,6 +252,7 @@ sub _Assertion_Caret {
             sub {
               my ($x) = @_;
 
+
               my $e = $x->[0];
               if ($e == 0) {
                 return 1;
@@ -230,8 +260,8 @@ sub _Assertion_Caret {
               if (! $MarpaX::Languages::ECMAScript::AST::Pattern::multiline) {
                 return 0;
               }
-              my $c = substr($MarpaX::Languages::ECMAScript::AST::Pattern::input, $e, 1);
-              if (grep {$c == $_} @LINETERMINATOR) {
+              my $c = substr($MarpaX::Languages::ECMAScript::AST::Pattern::input, $e-1, 1);
+              if (exists($HASHLINETERMINATOR{$c})) {
                 return 1;
               }
 
@@ -254,7 +284,7 @@ sub _Assertion_Dollar {
                 return 0;
               }
               my $c = substr($MarpaX::Languages::ECMAScript::AST::Pattern::input, $e, 1);
-              if (grep {$c == $_} @LINETERMINATOR) {
+              if (exists($HASHLINETERMINATOR{$c})) {
                 return 1;
               }
 
@@ -271,17 +301,17 @@ sub _isWordChar {
     #
     # This really refers to ASCII characters, so it is ok to test the ord directly
     #
-    my $c = substr($MarpaX::Languages::ECMAScript::AST::Pattern::input, $e, 1);
+    my $c = ord(substr($MarpaX::Languages::ECMAScript::AST::Pattern::input, $e, 1));
     #
     # I put the most probables (corresponding also to the biggest ranges) first
     if (
-	($c >= 'a' && $c <= 'z')
+	($c >= ORD_a && $c <= ORD_z)
 	||
-	($c >= 'A' && $c <= 'Z')
+	($c >= ORD_A && $c <= ORD_Z)
 	||
-	($c >= '0' && $c <= '9')
+	($c >= ORD_0 && $c <= ORD_9)
 	||
-	($c == '_')
+	($c == ORD__)
 	) {
 	return 1;
     }
@@ -412,32 +442,19 @@ sub _QuantifierPrefix_QuestionMark {
 sub _QuantifierPrefix_DecimalDigits {
     my ($self, undef, $decimalDigits, undef) = @_;
 
-    #
-    # Note: DecimalDigits is a string
-    #
-    my $i = int($decimalDigits);
-    return [$i, $i];
+    return [$decimalDigits, $decimalDigits];
 }
 
 sub _QuantifierPrefix_DecimalDigits_Comma {
     my ($self, undef, $decimalDigits, undef) = @_;
 
-    #
-    # Note: DecimalDigits is a string
-    #
-    my $i = int($decimalDigits);
-    return [$i, undef];
+    return [$decimalDigits, undef];
 }
 
 sub _QuantifierPrefix_DecimalDigits_DecimalDigits {
     my ($self, undef, $decimalDigits1, undef, $decimalDigits2, undef) = @_;
 
-    #
-    # Note: DecimalDigits is a string
-    #
-    my $i = int($decimalDigits1);
-    my $j = int($decimalDigits2);
-    return [$i, $j];
+    return [$decimalDigits1, $decimalDigits2];
 }
 
 sub _canonicalize {
@@ -446,15 +463,11 @@ sub _canonicalize {
     if (! $MarpaX::Languages::ECMAScript::AST::Pattern::ignoreCase) {
 	return $ch;
     }
-    #
-    # Note: we use the Unicode Case-Folding feature of perl, i.e. lowercase
-    # instead of uppercase - no change in the resulting logic
-    #
-    my $u = uc($ch);
+
+    my $u = &$MarpaX::Languages::ECMAScript::AST::Pattern::upperCase($ch);
     if (length($u) != 1) {
 	#
-	# This is where ECMAScript logic is broken, I don't know why it has
-	# been designed like that.
+	# I don't know why it has been designed like that -;
 	#
 	return $ch;
     }
@@ -628,11 +641,7 @@ sub _AtomEscape_CharacterEscape {
 sub _AtomEscape_CharacterClassEscape {
     my ($self, $characterClassEscape) = @_;
 
-    #
-    # Note: CharacterClassEscape RHS is an anonymous lexeme, default lexeme value is [start,length,value]
-    #
-    my $A = $characterClassEscape->[2];
-    return $self->_characterSetMatcher($A, 0);
+    return $self->_characterSetMatcher($characterClassEscape, 0);
 }
 
 sub _CharacterEscape_ControlEscape {
@@ -673,7 +682,7 @@ sub _CharacterEscape_ControlLetter {
 #
 # Note: _HexDigit is a lexeme, default lexeme value is [start,length,value]
 #
-sub _HexEscapeSequence { return chr(16 * hex($_[1]->[2]) + hex($_[2]->[2])); }
+sub _HexEscapeSequence { return chr(16 * hex($_[2]->[2]) + hex($_[3]->[2])); }
 sub _UnicodeEscapeSequence { return chr(4096 * hex($_[2]->[2]) + 256 * hex($_[3]->[2]) + 16 * hex($_[4]->[2]) + hex($_[5]->[2])); }
 
 sub _CharacterEscape_HexEscapeSequence {
@@ -707,46 +716,22 @@ sub _DecimalEscape_DecimalIntegerLiteral {
     return $i;
 }
 
-sub _DecimalIntegerLiteral_Zero {
-    my ($self, undef) = @_;
+sub _DecimalIntegerLiteral {
+    my ($self, $decimalIntegerLiteral) = @_;
 
-    return 0;
+    #
+    # Note: decimalIntegerLiteral is a lexeme, default lexeme value is [start,length,value]
+    #
+    return int($decimalIntegerLiteral->[2]);
 }
 
-sub _DecimalIntegerLiteral_NonZeroDigit {
-    my ($self, $nonZeroDigit) = @_;
-
-    #
-    # Note: nonZeroDigit is a lexeme, default lexeme value is [start,length,value]
-    #
-    my $i = $nonZeroDigit->[2];
-
-    return $i;
-}
-
-sub _DecimalIntegerLiteral_NonZeroDigit_DecimalDigits {
-    my ($self, $nonZeroDigit, $decimalDigits) = @_;
-
-    #
-    # Note: DecimalDigits is a string
-    #
-    my $s = $nonZeroDigit->[2] . $decimalDigits;
-
-    return int($s);
-}
-
-#
-# Let's return a string that is concatenating the digits
-#
 sub _DecimalDigits {
-    my ($self, @decimalDigit) = @_;
+    my ($self, $decimalDigits) = @_;
 
-    my $s = '';
-    foreach (@decimalDigit) {
-	$s .= $_->[2];
-    }
-
-    return $s;
+    #
+    # Note: decimalDigits is a lexeme, default lexeme value is [start,length,value]
+    #
+    return int($decimalDigits->[2]);
 }
 
 sub _CharacterClassEscape {
@@ -818,7 +803,7 @@ sub _charsetUnion {
     my ($self, $A, $B) = @_;
 
     my ($Anegation, $Arange) = @{$A};
-    my ($Bnegation, $Brange) = @{$A};
+    my ($Bnegation, $Brange) = @{$B};
 
     if ($Anegation == $Bnegation) {
 	#
@@ -1016,7 +1001,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Semantic
 
 =head1 VERSION
 
-version 0.012
+version 0.013
 
 =head1 DESCRIPTION
 
@@ -1047,6 +1032,10 @@ perl's scalar boolean, saying if this is a multiline match. Default is a false v
 =item $ignoreCase
 
 perl's scalar boolean, saying if this is an insensitive match. Default is a false value.
+
+=item $upperCase
+
+CODE reference to a function that take a single argument, a code point, and returns its upper case version. Default to a builtin subroutine reference that returns Unicode's uppercase.
 
 =back
 

@@ -9,7 +9,7 @@ our $grammar_content = do {local $/; <DATA>};
 
 # ABSTRACT: ECMAScript-262, Edition 5, URI grammar
 
-our $VERSION = '0.012'; # VERSION
+our $VERSION = '0.013'; # TRIAL VERSION
 
 
 
@@ -31,7 +31,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::URI - ECMAScript-
 
 =head1 VERSION
 
-version 0.012
+version 0.013
 
 =head1 SYNOPSIS
 
@@ -82,7 +82,7 @@ __DATA__
 #
 :start ::= uri
 :default ::= action => [values]
-lexeme default = action => [start,length,value]
+lexeme default = action => [start,length,value] forgiving => 1
 
 uri           ::= uriCharactersopt
 

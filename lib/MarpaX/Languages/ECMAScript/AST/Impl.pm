@@ -5,12 +5,12 @@ package MarpaX::Languages::ECMAScript::AST::Impl;
 
 # ABSTRACT: Implementation of Marpa's interface
 
-use Marpa::R2 2.078000;
+use Marpa::R2 2.079_015;
 use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 use MarpaX::Languages::ECMAScript::AST::Impl::Logger;
 use MarpaX::Languages::ECMAScript::AST::Impl::Singleton;
 
-our $VERSION = '0.012'; # VERSION
+our $VERSION = '0.013'; # TRIAL VERSION
 
 our $MARPA_TRACE_FILE_HANDLE;
 our $MARPA_TRACE_BUFFER;
@@ -216,7 +216,7 @@ MarpaX::Languages::ECMAScript::AST::Impl - Implementation of Marpa's interface
 
 =head1 VERSION
 
-version 0.012
+version 0.013
 
 =head1 SYNOPSIS
 
