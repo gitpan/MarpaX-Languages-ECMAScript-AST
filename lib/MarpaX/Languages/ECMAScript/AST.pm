@@ -24,7 +24,7 @@ our $CACHE = CHI->new(driver => 'File',
                       namespace => 'cache',
 		      max_key_length => 32);
 
-our $VERSION = '0.013'; # TRIAL VERSION
+our $VERSION = '0.014'; # VERSION
 our $CURRENTVERSION;
 {
   #
@@ -279,7 +279,7 @@ MarpaX::Languages::ECMAScript::AST - Translate a ECMAScript source to an AST
 
 =head1 VERSION
 
-version 0.013
+version 0.014
 
 =head1 SYNOPSIS
 

@@ -10,7 +10,7 @@ package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Template;
 # ABSTRACT: Template for ECMAScript_262_5 transpilation using an AST
 
 
-our $VERSION = '0.013'; # TRIAL VERSION
+our $VERSION = '0.014'; # VERSION
 
 
 sub new {
@@ -4556,7 +4556,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Template - Templa
 
 =head1 VERSION
 
-version 0.013
+version 0.014
 
 =head1 DESCRIPTION
 

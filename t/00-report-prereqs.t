@@ -32,6 +32,7 @@ my @modules = qw(
   File::Temp
   IO::Handle
   IPC::Open3
+  Import::Into
   List::Compare::Functional
   List::Util
   Log::Any
@@ -48,7 +49,6 @@ my @modules = qw(
   base
   constant
   diagnostics
-  feature
   parent
   perl
   strict

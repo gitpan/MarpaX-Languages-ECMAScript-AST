@@ -17,7 +17,7 @@ use constant {
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical string grammar actions
 
-our $VERSION = '0.013'; # TRIAL VERSION
+our $VERSION = '0.014'; # VERSION
 
 
 
@@ -68,7 +68,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Lexical::StringLi
 
 =head1 VERSION
 
-version 0.013
+version 0.014
 
 =head1 DESCRIPTION
 
