@@ -8,50 +8,6 @@ BEGIN {
     use_ok( 'MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics' ) || print "Bail out!\n";
 }
 
-my $ecmaAst = MarpaX::Languages::ECMAScript::AST->new();
-my $stringNumericLiteral = $ecmaAst->stringNumericLiteral;
+our $impl = 'MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics';
 
-my %DATA = (
-    'ff'         => sub {my $rc = shift; ok(MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics->is_nan($rc), 'input: "ff"' . "=> $rc")},
-    '09'         => sub {my $rc = shift; ok("$rc" == 9, 'input: "09"' . "=> $rc")},
-    '+09'        => sub {my $rc = shift; ok("$rc" == 9, 'input: "+09"' . "=> $rc")},
-    '-000000009' => sub {my $rc = shift; ok("$rc" == -9, 'input: "-000000009"' . "=> $rc")},
-    '          ' => sub {my $rc = shift; ok(MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics->is_zero($rc), 'input: "          "' . "=> $rc")},
-    "    \n    " => sub {my $rc = shift; ok(MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics->is_zero($rc), 'input: "    \n    "' . "=> $rc")},
-    '123.85'     => sub {my $rc = shift; ok("$rc" == 123.85, 'input: "123.85"' . "=> $rc")},
-    '0123.85'    => sub {my $rc = shift; ok("$rc" == 123.85, 'input: "0123.85"' . "=> $rc")},
-    '0123.085'   => sub {my $rc = shift; ok("$rc" == 123.085, 'input: "0123.085"' . "=> $rc")},
-    '0123.0850'  => sub {my $rc = shift; ok("$rc" == 123.0850, 'input: "0123.0850"' . "=> $rc")},
-    '$123.85'    => sub {my $rc = shift; ok(MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics->is_nan($rc), 'input: "$123.85"' . "=> $rc")},
-    'three'      => sub {my $rc = shift; ok(MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics->is_nan($rc), 'input: "three"' . "=> $rc")},
-    '0xFF'       => sub {my $rc = shift; ok("$rc" == 0xFF, 'input: "0xFF"' . "=> $rc")},
-    '3.14'       => sub {my $rc = shift; ok("$rc" == 3.14, 'input: "3.14' . "=> $rc")},
-    '0.0314E+02' => sub {my $rc = shift; ok("$rc" == 3.14, 'input: "0.0314E+02"' . "=> $rc")},
-    '.0314E+02'  => sub {my $rc = shift; ok("$rc" == 3.14, 'input: ".0314E+02"' . "=> $rc")},
-    '314.E-2'    => sub {my $rc = shift; ok("$rc" == 3.14, 'input: "314.E-2"' . "=> $rc")},
-    '314.E-0002' => sub {my $rc = shift; ok("$rc" == 3.14, 'input: "314.E-0002"' . "=> $rc")},
-    '00314.E-02' => sub {my $rc = shift; ok("$rc" == 3.14, 'input: "00314.E-02"' . "=> $rc")},
-    " 1.0 "      => sub {my $rc = shift; ok("$rc" == 1, 'input: " 1.0 "' . "=> $rc")},
-    ""           => sub {my $rc = shift; ok(MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics->is_zero($rc), 'input: ""' . "=> $rc")},
-    "Infinity"   => sub {my $rc = shift; ok(MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics->is_infinite($rc), 'input: "Infinity"' . "=> $rc")},
-    "+Infinity"  => sub {my $rc = shift; ok(MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics->is_infinite($rc), 'input: "+Infinity"' . "=> $rc")},
-    "-Infinity"  => sub {my $rc = shift; ok(MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics->is_infinite($rc), 'input: "-Infinity"' . "=> $rc")},
-    );
-foreach (keys %DATA) {
-    my $value;
-    if (length("$_") <= 0) {
-	$value = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics->pos_zero();
-    } else {
-	eval{
-	    my $parse = $stringNumericLiteral->{grammar}->parse("$_",
-								$stringNumericLiteral->{impl});
-	    $value = $stringNumericLiteral->{grammar}->value($stringNumericLiteral->{impl});
-	};
-        if ($@) {
-            $value = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLiteral::NativeNumberSemantics->nan;
-        }
-    }
-    $DATA{$_}($value);
-}
-
-done_testing(2 + scalar(keys %DATA));
+require File::Spec->catfile('inc', 'stringNumericLiteralDoTests.pl');

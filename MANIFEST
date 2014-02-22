@@ -7,6 +7,7 @@ META.yml
 Makefile.PL
 README
 dist.ini
+inc/stringNumericLiteralDoTests.pl
 lib/MarpaX/Languages/ECMAScript/AST.pm
 lib/MarpaX/Languages/ECMAScript/AST/Exceptions.pm
 lib/MarpaX/Languages/ECMAScript/AST/Grammar.pm

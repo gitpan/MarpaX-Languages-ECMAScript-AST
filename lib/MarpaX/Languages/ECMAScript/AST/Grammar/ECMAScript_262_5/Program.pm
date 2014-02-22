@@ -22,7 +22,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical program grammar written in Marpa BNF
 
-our $VERSION = '0.014'; # VERSION
+our $VERSION = '0.015'; # VERSION
 
 our $WhiteSpace        = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsWhiteSpace}])/;
 our $LineTerminator    = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsLineTerminator}])/;
@@ -477,7 +477,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program - ECMAScr
 
 =head1 VERSION
 
-version 0.014
+version 0.015
 
 =head1 SYNOPSIS
 

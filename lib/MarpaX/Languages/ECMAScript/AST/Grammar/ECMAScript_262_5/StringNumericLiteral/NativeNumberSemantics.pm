@@ -11,174 +11,301 @@ our $POS_ZERO = have_signed_zero() ? Data::Float::pos_zero()     : Math::BigFloa
 our $NEG_ZERO = have_signed_zero() ? Data::Float::neg_zero()     : Math::BigFloat->bzero();   # No -0 with Math::BigFloat.
 our $POS_INF  = have_infinite()    ? Data::Float::pos_infinity() : Math::BigFloat->binf();
 our $NEG_INF  = have_infinite()    ? Data::Float::neg_infinity() : Math::BigFloat->binf('-');
+our $POS_ONE  = +1;
+our $NEG_ONE  = -1;
 our $NAN      = have_nan()         ? Data::Float::nan()          : Math::BigFloat->bnan();
+our $UNDEF    = undef;
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical string numeric grammar default semantics package, using native perl representations
 
-our $VERSION = '0.014'; # VERSION
+our $VERSION = '0.015'; # VERSION
 
 
 
 sub new {
-    return bless({_number => 0, length => 0}, $_[0]);
+  my ($class, %opts) = @_;
+  my $self = {_number => $opts{number}    // 0,
+              _length => $opts{length}    // 0,
+              _decimal => $opts{decimal } // 0};
+  bless($self, $class);
+  return $self;
 }
 
 
-sub host_mul {
+sub clone_init {
+  my ($self) = @_;
+  return (ref $self)->new();
+}
+
+
+sub clone {
+  my ($self) = @_;
+  return (ref $self)->new(number => $self->{_number}, length => $self->{_length}, decimal => $self->{_decimal});
+}
+
+
+sub decimalOn {
+    $_[0]->{_decimal} = 1;
+    return $_[0];
+}
+
+
+sub mul {
     $_[0]->{_number} *= $_[1]->{_number};
     return $_[0];
 }
 
 
-sub host_round {
+sub nan {
+    $_[0]->{_number} = $NAN;
     return $_[0];
 }
 
 
-sub host_pos_zero {
+sub pos_one {
+    $_[0]->{_number} = $POS_ONE;
+    return $_[0];
+}
+
+
+sub neg_one {
+    $_[0]->{_number} = $NEG_ONE;
+    return $_[0];
+}
+
+
+sub pos_zero {
     $_[0]->{_number} = $POS_ZERO;
     return $_[0];
 }
 
 
-sub host_pos_inf {
+sub pos_inf {
     $_[0]->{_number} = $POS_INF;
     return $_[0];
 }
 
 
-sub host_pow {
+sub pow {
     $_[0]->{_number} = 10 ** $_[1]->{_number};
     return $_[0];
 }
 
 
-sub host_int {
-    $_[0]->{_number} = int("$_[1]");
+sub int {
+    $_[0]->{_number} = CORE::int("$_[1]");
     $_[0]->{_length} = length("$_[1]");
     return $_[0];
 }
 
 
-sub host_hex {
-    $_[0]->{_number} = hex("$_[1]");
+sub hex {
+    $_[0]->{_number} = CORE::hex("$_[1]");
     return $_[0];
 }
 
 
-sub host_neg {
+sub neg {
     $_[0]->{_number} *= -1;
     return $_[0];
 }
 
 
-sub host_add {
+sub abs {
+    $_[0]->{_number} = CORE::abs($_[0]->{_number});
+    return $_[0];
+}
+
+
+sub new_from_sign {
+  if ($_[0]->is_nan) {
+    return $_[0]->clone_init->nan;
+  }
+  elsif ($_[0]->is_pos) {
+    return $_[0]->clone_init->pos_one;
+  }
+  else {
+    return $_[0]->clone_init->neg_one;
+  }
+}
+
+
+sub new_from_cmp {
+  if ($_[0]->is_nan || $_[1]->is_nan) {
+    return $_[0]->clone_init->nan;
+  }
+  else {
+    my $tmp = $_[0]->clone->sub($_[1]);
+    if ($tmp->is_zero) {
+      return $_[0]->clone_init->pos_zero;
+    }
+    elsif ($tmp->is_neg) {
+      return $_[0]->clone_init->neg_one;
+    }
+    else {
+      return $_[0]->clone_init->pos_one;
+    }
+  }
+}
+
+
+sub add {
     $_[0]->{_number} += $_[1]->{_number};
     return $_[0];
 }
 
 
-sub host_sub {
+sub sub {
     $_[0]->{_number} -= $_[1]->{_number};
     return $_[0];
 }
 
 
-sub host_inc_length {
+sub inc_length {
     ++$_[0]->{_length};
     return $_[0];
 }
 
 
-sub host_new_from_length {
-    return $_[0]->host_class->new->host_int("$_[0]->{_length}");
+sub new_from_length {
+    return $_[0]->clone_init->int("$_[0]->{_length}");
 }
 
 
-sub host_class {
-  return blessed($_[0]);
+sub sign {
+  if ($_[0]->is_zero) {
+    return 0;
+  }
+  elsif ($_[0]->is_pos) {
+    return 1;
+  }
+  elsif ($_[0]->is_neg) {
+    return -1;
+  }
+  else {
+    return undef;
+  }
 }
 
 
-sub host_value {
+sub cmp {
+    return $_[0]->new_from_cmp($_[1])->sign;
+}
+
+
+sub host_number {
   return $_[0]->{_number};
 }
 
 
-sub pos_zero {
-    my ($class) = @_;
-    return $POS_ZERO;
-}
-
-
-sub neg_zero {
-    my ($class) = @_;
-    return $NEG_ZERO;
-}
-
-
-sub pos_infinity {
-    my ($class) = @_;
-    return $POS_INF;
-}
-
-
-sub neg_infinity {
-    my ($class) = @_;
-    return $NEG_INF;
-}
-
-
-sub nan {
-    my ($class) = @_;
-    return $NAN;
+sub host_value {
+  #
+  # This is native implementation, i.e. we assume that the Math and/or CPUs under the hood
+  # are already IEEE-754 compliant, including rounding.
+  #
+  # This mean that we return internal number as is.
+  #
+  return $_[0]->{_number};
 }
 
 
 sub is_zero {
-    my ($class, $value) = @_;
-    my $blessed = blessed($value) || '';
+    my $blessed = blessed($_[0]->{_number}) || '';
     if (! $blessed) {
 	#
 	# float_is_zero never fails
 	#
-	return Data::Float::float_is_zero($value);
-    } elsif ($value->can('is_zero')) {
-	return $value->is_zero();
+	return Data::Float::float_is_zero($_[0]->{_number});
+    } elsif ($_[0]->{_number}->can('is_zero')) {
+	return $_[0]->{_number}->is_zero();
     } else {
-	return undef;
+	return $UNDEF;
     }
 }
 
 
-sub is_infinite {
-    my ($class, $value) = @_;
-    my $blessed = blessed($value) || '';
+sub is_pos_one {
+    my $blessed = blessed($_[0]->{_number}) || '';
+    if (! $blessed) {
+	return ($_[0]->{_number} == $POS_ONE) ? 1 : 0;
+    } elsif ($_[0]->{_number}->can('is_one')) {
+	return $_[0]->{_number}->is_one();
+    } else {
+	return $UNDEF;
+    }
+}
+
+
+sub is_neg_one {
+    my $blessed = blessed($_[0]->{_number}) || '';
+    if (! $blessed) {
+	return ($_[0]->{_number} == $NEG_ONE) ? 1 : 0;
+    } elsif ($_[0]->{_number}->can('is_one')) {
+	return $_[0]->{_number}->is_one('-');
+    } else {
+	return $UNDEF;
+    }
+}
+
+
+sub is_pos {
+    my $blessed = blessed($_[0]->{_number}) || '';
+    if (! $blessed) {
+      if ($_[0]->is_nan) {
+        return 0;
+      } else {
+        return (Data::Float::signbit($_[0]->{_number}) == 0) ? 1 : 0;
+      }
+    } elsif ($_[0]->{_number}->can('is_pos')) {
+	return $_[0]->{_number}->is_pos();
+    } else {
+	return $UNDEF;
+    }
+}
+
+
+sub is_neg {
+    my $blessed = blessed($_[0]->{_number}) || '';
+    if (! $blessed) {
+      if ($_[0]->is_nan) {
+        return 0;
+      } else {
+        return (Data::Float::signbit($_[0]->{_number}) == 0) ? 0 : 1;
+      }
+    } elsif ($_[0]->{_number}->can('is_neg')) {
+	return $_[0]->{_number}->is_neg();
+    } else {
+	return $UNDEF;
+    }
+}
+
+
+sub is_inf {
+    my $blessed = blessed($_[0]->{_number}) || '';
     if (! $blessed) {
 	#
 	# isinf() never fails
 	#
-	return isinf($value);
-    } elsif ($value->can('is_inf')) {
-	return $value->is_inf();
+	return isinf($_[0]->{_number});
+    } elsif ($_[0]->{_number}->can('is_inf')) {
+	return $_[0]->{_number}->is_inf();
     } else {
-	return undef;
+	return $UNDEF;
     }
 }
 
 
 sub is_nan {
-    my ($class, $value) = @_;
-    my $blessed = blessed($value) || '';
+    my $blessed = blessed($_[0]->{_number}) || '';
     if (! $blessed) {
 	#
 	# isnan() never fails
 	#
-	return isnan($value);
-    } elsif ($value->can('is_nan')) {
-	return $value->is_nan();
+	return isnan($_[0]->{_number});
+    } elsif ($_[0]->{_number}->can('is_nan')) {
+	return $_[0]->{_number}->is_nan();
     } else {
-	return undef;
+	return $UNDEF;
     }
 }
 
@@ -196,107 +323,221 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLite
 
 =head1 VERSION
 
-version 0.014
+version 0.015
 
 =head1 DESCRIPTION
 
-This modules provide a default semantics package for the actions associated to ECMAScript_262_5 lexical string numeric grammar, using native number representation, with the possible exceptions of positive zero and positive infinity: If one of them is not available natively, then the Math::BigFloat representation is used.
+This modules provide a default semantics package for the actions associated to ECMAScript_262_5 lexical string numeric grammar, using native number representation, with the possible exceptions of positive zero and positive infinity: if one of them is not available natively, then the Math::BigFloat representation is used.
 
-For this reason, this module exports two class methods to test if a number is zero or not, that use the native library or Math::BigFloat.
+This module exports more methods, intended to provide a complete set of functions necessary for ECMAScript runtime.
 
-For convenience, even if this is not formally in the string numeric grammar, the neg_zero(), neg_infinity(), nan(), is_zero(), is_infinite() and is_nan() methods are also exported.
+The new() method returns an object hiding number implementation.
 
-=head2 new($class)
+All method names starting with host_ return a value understandable only by the host.
 
-Instantiate a new object that has two members: number initialized to host's positive zero, and length initalized to host's positive zero.
+All method names starting with is_ return a value understandable by perl, as well as the sign() and cmp() methods.
 
-=head2 host_mul($self, $objmul)
+For every method, this module says if it should be overwriten in case of an alternate implementation. If there is no such mention this mean that the method in the package is only calling other methods. Therefore it is safe to use this module as a parent, provided that all methods marked as "should be overwriten", are as such.
 
-Host implementation of $self multiplied by $objmul. Returns $self.
+=head2 new($class, %opts)
 
-=head2 host_round($self)
+Instantiate a new object that has three members:
 
-Host implementation of rounded $self. Returns $self.
+=over
 
-=head2 host_pos_zero($self)
+=item number
 
-Host implementation of $self setted to positive zero, defaulting to Data::Float::pos_zero if your host have signed zeroes, 0 otherwise. Returns $self.
+Initialized to $opts{number} or host's positive zero
 
-=head2 host_pos_inf($self)
+=item length
 
-Host implementation of $self setted to positive infinity, defaulting to Data::Float::pos_infinity if your host have infinity, otherwise a trial between (~0)**(~0) and {my $n = 2; $n *= $n while $n < $n*$n; $n}. Return $self.
+Initialized to $opts{length} or host's positive zero
 
-=head2 host_pow($self, $powobj)
+=item decimal
 
-Host implementation of $self setted to 10 ** $powobj. Returns $self.
+Initialized to a $opts{decimal} or a host's false value
 
-=head2 host_int($self, $string)
+=back
 
-Host implementation of $self setted to positive integer represented in $string, length initialized to the number of characters in $string. Returns $self.
+These three members are independant values. "length" is used when evaluating a number with a dot character '.'. "decimal" is a flag setted by the grammar when the Mathematical value is done on a decimal literal. Unless stated, all methods are manipulating only the "number" component.
 
-=head2 host_hex($self, $string)
+Should be overwriten in case of alternate implementation.
 
-Host implementation of $self setted to positive hexadecimal integer represented in $string. Returns $self.
+=head2 clone_init($self)
 
-=head2 host_neg($self)
+New instance that is a initialized clone of $self, like new() with no option.
 
-Host implementation of $self sign change. Returns $self.
+=head2 clone($self)
 
-=head2 host_add($self, $addobj)
+Cloning of $self (i.e. copy of all $self's members). Returns a new instance.
 
-Host implementation of $addobj added to $self. Returns $self.
+Should be overwriten in case of alternate implementation, if internal member are not named _number, _length and _decimal and if simple assignment is not enough.
 
-=head2 host_sub($self, $subobj)
+=head2 decimalOn($self)
 
-Host implementation of $subobj substracted from $self. Returns $self.
+Host implementation of $self's decimal setted to a true value. Returns $self.
 
-=head2 host_inc_length($self)
+Should be overwriten in case of alternate implementation, if internal member is not _decimal.
 
-Increase by one the host representation of the number of characters used to evaluate the host value. Returns $self.
+=head2 mul($self, $objmul)
 
-=head2 host_new_from_length($self)
+Host implementation of $self's number multiplied by $objmul's number. Returns $self.
 
-Returns the a new object derived from the number of characters used to evaluate the host value of $self. Returns the new object instance.
+Should be overwriten in case of alternate implementation.
 
-=head2 host_class($self)
+=head2 nan($self)
 
-Returns the host class that, when called as class->new, is creating a new object.
+Host implementation of $self's number setted to nan, defaulting to Data::Float::nan if your host have it, Math::BigFloat's implementation otherwise. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 pos_one($self)
+
+Host implementation of $self's number setted to positive one, defaulting to +1. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 neg_one($self)
+
+Host implementation of $self's number setted to negative one, defaulting to -1. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 pos_zero($self)
+
+Host implementation of $self's number setted to positive zero, defaulting to Data::Float::pos_zero if your host have signed zeroes, 0 otherwise. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 pos_inf($self)
+
+Host implementation of $self's number setted to positive infinity, defaulting to Data::Float::pos_infinity if your host have infinity, otherwise a trial between (~0)**(~0) and {my $n = 2; $n *= $n while $n < $n*$n; $n}. Return $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 pow($self, $powobj)
+
+Host implementation of $self's number setted to 10 ** $powobj's number. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 int($self, $string)
+
+Host implementation of $self's number setted to positive integer represented in $string, length being initialized to the number of characters in $string. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 hex($self, $string)
+
+Host implementation of $self's number setted to positive hexadecimal integer represented in $string. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 neg($self)
+
+Host implementation of $self's number sign change. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 abs($self)
+
+Host implementation of absolute value applied to $self's number. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 new_from_sign($self)
+
+Host implementation of sign applied to $self. Returns a new instance initialized with neg_one() if $self's value is negative, pos_one() if $self's value is positive, nan() if $self's value is not a number.
+
+=head2 new_from_cmp($self, $cmpobj)
+
+Host implementation of comparison between $self and $cmpobj. Returns a new instance initialized with neg_one() if $self's value < $cmpobj's value, pos_one() if $self's value > $cmpobj's value, pos_zero() if $self's value == $cmpobj's value, nan() otherwise.
+
+=head2 add($self, $addobj)
+
+Host implementation of $addobj's number added to $self's number. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 sub($self, $subobj)
+
+Host implementation of $subobj's number substracted from $self's number. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 inc_length($self)
+
+Increase by one the length internal member of $self. This will be the host representation of a number of characters, used to evaluate internal number. Returns $self.
+
+Should be overwriten in case of alternate implementation, if internal member is not named _length.
+
+=head2 new_from_length($self)
+
+Returns a new instance derived from the length internal member, initialized using $self->int(). Returns the new object instance.
+
+Should be overwriten in case of alternate implementation, if internal member is not named _length.
+
+=head2 sign($self)
+
+Returns a perl's positive number if $self->host_value is a positive number, a perl's negative number if $self->host_value is a negative number, a perl's zero if $self->host_value is a zero, a perl's undef otherwise.
+
+=head2 cmp($self, $cmpobj)
+
+Alias for $self->new_from_cmp($cmpobj)->sign;
+
+=head2 host_number($self)
+
+Returns the internal $self's number hosted in $self.
+
+Should be overwriten in case of alternate implementation, if internal member is not named _number.
 
 =head2 host_value($self)
 
-Returns the host implementation of value hosted in $self.
+Returns the rounded internal $self's number hosted in $self.
 
-=head2 pos_zero($class)
+Should be overwriten in case of alternate implementation.
 
-Class method that returns the host implementation of (positive if any) zero, or its Math::BigFloat implementation otherwise.
+=head2 is_zero($self)
 
-=head2 neg_zero($class)
+Returns a perl's true or false if $self->host_value is zero. In case $self->host_value would be a blessed object, $self->host_value->is_zero() is returned if $self->host_value can do this method, otherwise undef is returned.
 
-Class method that returns the host implementation of (negative if any) zero, or its Math::BigFloat implementation otherwise.
+Should be overwriten in case of alternate implementation, if internal member is not named _number and is not an object supporting is_zero() method.
 
-=head2 pos_infinity($class)
+=head2 is_pos_one($self)
 
-Class method that returns the host implementation of (positive if any) infinity, or its Math::BigFloat implementation otherwise.
+Returns a perl's true or false if $self->host_value is a +1. In case $self->host_value would be a blessed object, $self->host_value->is_one() is returned if $self->host_value can do this method, otherwise undef is returned.
 
-=head2 neg_infinity($class)
+Should be overwriten in case of alternate implementation, if internal member is not named _number and is not an object supporting is_one() method.
 
-Class method that returns the host implementation of (negative if any) infinity, or its Math::BigFloat implementation otherwise.
+=head2 is_neg_one($self)
 
-=head2 nan($class)
+Returns a perl's true or false if $self->host_value is -1. In case $self->host_value would be a blessed object, $self->host_value->is_one('-') is returned if $self->host_value can do this method, otherwise undef is returned.
 
-Class method that returns the host implementation of NaN, or its Math::BigFloat implementation otherwise.
+Should be overwriten in case of alternate implementation, if internal member is not named _number and is not an object supporting is_one('-') method.
 
-=head2 is_zero($class, $value)
+=head2 is_pos($self)
 
-Class method that returns true or false if $value is zero. In case $value would be a blessed object, $value->is_zero() is returned if $value can do this method, otherwise undef is returned.
+Returns a perl's true or false if $self->host_value is a positive number. In case $self->host_value would be a blessed object, $self->host_value->is_pos() is returned if $self->host_value can do this method, otherwise undef is returned.
 
-=head2 is_infinite($class, $value)
+Should be overwriten in case of alternate implementation, if internal member is not named _number and is not an object supporting is_pos() method.
 
-Class method that returns true or false if $value is infinite. In case $value would be a blessed object, $value->is_inf() is returned if $value can do this method, otherwise undef is returned.
+=head2 is_neg($self)
 
-=head2 is_nan($class, $value)
+Returns a perl's true or false if $self->host_value is a negative number. In case $self->host_value would be a blessed object, $self->host_value->is_neg() is returned if $self->host_value can do this method, otherwise host's undefined value is returned.
 
-Class method that returns true or false if $value is NaN. In case $value would be a blessed object, $value->is_nan() is returned if $value can do this method, otherwise undef is returned.
+Should be overwriten in case of alternate implementation, if internal member is not named _number and is not an object supporting is_neg() method.
+
+=head2 is_inf($self)
+
+Returns a perl's true or false if $self->host_value is infinite. In case $self->host_value would be a blessed object, $self->host_value->is_inf() is returned if $self->host_value can do this method, otherwise host's undefined value is returned.
+
+Should be overwriten in case of alternate implementation, if internal member is not named _number and is not an object supporting is_inf() method.
+
+=head2 is_nan($self)
+
+Returns a perl's true or false if $self->host_value is not a number. In case $self->host_value would be a blessed object, $self->host_value->is_nan() is returned if $self->host_value can do this method, otherwise host's undefined is returned.
+
+Should be overwriten in case of alternate implementation, if internal member is not named _number and is not an object supporting is_nan() method.
 
 =head1 AUTHOR
 

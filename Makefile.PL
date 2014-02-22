@@ -37,7 +37,7 @@ my %WriteMakefileArgs = (
     "Import::Into" => 0,
     "List::Compare::Functional" => "0.21",
     "Log::Any" => 0,
-    "Marpa::R2" => "2.079_015",
+    "Marpa::R2" => "2.080000",
     "Math::BigFloat" => 0,
     "Module::Util" => 0,
     "SUPER" => 0,
@@ -64,7 +64,7 @@ my %WriteMakefileArgs = (
     "Test::Differences" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.014",
+  "VERSION" => "0.015",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -94,7 +94,7 @@ my %FallbackPrereqs = (
   "List::Compare::Functional" => "0.21",
   "List::Util" => 0,
   "Log::Any" => 0,
-  "Marpa::R2" => "2.079_015",
+  "Marpa::R2" => "2.080000",
   "Math::BigFloat" => 0,
   "Module::Util" => 0,
   "SUPER" => 0,

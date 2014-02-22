@@ -10,7 +10,7 @@ use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 
 # ABSTRACT: ECMAScript, grammars base package
 
-our $VERSION = '0.014'; # VERSION
+our $VERSION = '0.015'; # VERSION
 
 #
 # Note: because this module is usually subclasses, internal methods are called
@@ -244,7 +244,11 @@ sub parse {
 sub value {
   my ($self, $impl) = @_;
 
-  my $rc = $impl->value() || do {$impl->destroy_R; InternalError(error => sprintf('%s', _show_last_expression($self, $impl)))};
+  my $rc = $impl->value() || do {
+      my $lastExpression = _show_last_expression($self, $impl);
+      $impl->destroy_R;
+      InternalError(error => sprintf('%s', $lastExpression))
+  };
   if (! defined($rc)) {
       $impl->destroy_R;
       InternalError(error => 'Undefined parse tree value');
@@ -340,7 +344,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::Base - ECMAScript, grammars base pa
 
 =head1 VERSION
 
-version 0.014
+version 0.015
 
 =head1 SYNOPSIS
 
