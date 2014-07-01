@@ -10,7 +10,7 @@ use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 
 # ABSTRACT: ECMAScript, grammars base package
 
-our $VERSION = '0.015'; # VERSION
+our $VERSION = '0.016'; # TRIAL VERSION
 
 #
 # Note: because this module is usually subclasses, internal methods are called
@@ -132,7 +132,7 @@ sub _callback {
 
   eval {$rc = &$callbackp(@args, $source, $pos, $max, $impl)};
   if ($@) {
-    my $callackErrorString = $@;
+    my $callbackErrorString = $@;
     my $line_columnp;
     eval {$line_columnp = lineAndCol($impl)};
     my $context = _context($self, $impl);
@@ -142,15 +142,15 @@ sub _callback {
     $impl->destroy_R;
     if (! $@) {
       if (defined($originalErrorString) && $originalErrorString) {
-        SyntaxError(error => sprintf("%s\n%s\n\n%s%s", $originalErrorString, $callackErrorString, showLineAndCol(@{$line_columnp}, $source), $context));
+        SyntaxError(error => sprintf("%s\n%s\n\n%s%s", $originalErrorString, $callbackErrorString, showLineAndCol(@{$line_columnp}, $source), $context));
       } else {
-        SyntaxError(error => sprintf("%s\n\n%s%s", $callackErrorString, showLineAndCol(@{$line_columnp}, $source), $context));
+        SyntaxError(error => sprintf("%s\n\n%s%s", $callbackErrorString, showLineAndCol(@{$line_columnp}, $source), $context));
       }
     } else {
       if (defined($originalErrorString) && $originalErrorString) {
-        SyntaxError(error => sprintf("%s\n%s\n%s", $originalErrorString, $callackErrorString, $context));
+        SyntaxError(error => sprintf("%s\n%s\n%s", $originalErrorString, $callbackErrorString, $context));
       } else {
-        SyntaxError(error => sprintf("%s\n%s", $callackErrorString, $context));
+        SyntaxError(error => sprintf("%s\n%s", $callbackErrorString, $context));
       }
     }
   }
@@ -175,10 +175,16 @@ sub parse {
   $start //= 0;
   $length //= -1;
 
+  my $sourceMaxPos = length($source) - 1;
+  if ($start < 0) {
+      $start += $sourceMaxPos + 1;
+  }
+  my $max = ($length < 0) ? ($length + $sourceMaxPos + 1) : ($start + $length);
+
   my $pos = $start;
-  my $max = length($source) - $start + $length;
   my $stop;
   my $newpos;
+
   #
   # Create a recognizer
   #
@@ -344,7 +350,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::Base - ECMAScript, grammars base pa
 
 =head1 VERSION
 
-version 0.015
+version 0.016
 
 =head1 SYNOPSIS
 
@@ -412,9 +418,9 @@ Class method that returns recommended recce ranking_method
 
 Class method that returns a default recce semantics_package, doing nothing else but a new().
 
-=head2 parse($self, $source, [$optionsp], [$start], [$length])
+=head2 parse($self, $source, $impl, [$optionsp], [$start], [$length])
 
-Parse the source given as reference to a scalar, an optional reference to a options that is a hash that can contain:
+Parse the source given as reference to a scalar, using implementation $impl, an optional reference to a options that is a hash that can contain:
 
 =over
 

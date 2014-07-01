@@ -22,7 +22,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical program grammar written in Marpa BNF
 
-our $VERSION = '0.015'; # VERSION
+our $VERSION = '0.016'; # TRIAL VERSION
 
 our $WhiteSpace        = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsWhiteSpace}])/;
 our $LineTerminator    = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsLineTerminator}])/;
@@ -111,6 +111,15 @@ sub make_grammar_content {
 sub make_semantics_package {
     my ($class) = @_;
     return join('::', $class, 'Semantics');
+}
+
+
+sub spacesAny {
+    my $self = shift;
+    if (@_) {
+	$self->{_spacesAny} = shift;
+    }
+    return $self->{_spacesAny};
 }
 
 
@@ -371,22 +380,10 @@ sub _isDecimalDigit {
 sub _isEnd {
     # my ($self, $source, $pos, $impl) = @_;
 
-  my $rc = 0;
-
-  my $prevpos = pos($_[1]);
-  pos($_[1]) = $_[2];
-
-  if ($_[1] =~ $isEnd) {
-    $rc = 1;
-  }
-
-  #if ($rc) {
-  #  $log->tracef('[_isEnd] Only spaces up to the end');
-  #}
-
-  pos($_[1]) = $prevpos;
-
-  return $rc;
+    my $grammar     = $_[0]->spacesAny->{grammar};
+    my $impl        = $_[0]->spacesAny->{impl};
+    $grammar->parse($_[1], $impl, $_[2]);
+    return $grammar->endReached;
 }
 
 sub _insertSemiColon {
@@ -477,7 +474,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program - ECMAScr
 
 =head1 VERSION
 
-version 0.015
+version 0.016
 
 =head1 SYNOPSIS
 
@@ -504,6 +501,10 @@ Returns the grammar. This will be injected in the Program's grammar.
 =head2 semantics_package($class)
 
 Class method that returns Program default recce semantics_package. These semantics are adding ruleId to all values, and execute eventually StringLiteral lexical grammar.
+
+=head2 spacesAny($self, $spacesAny)
+
+Getter/Setter of a SpacesAny grammar implementation, used internally by the Program grammar.
 
 =head2 parse($self, $source, $impl)
 

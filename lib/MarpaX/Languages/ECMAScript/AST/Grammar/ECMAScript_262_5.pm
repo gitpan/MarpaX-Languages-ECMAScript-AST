@@ -9,10 +9,11 @@ use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::JSON;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::URI;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Template;
+use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::SpacesAny;
 
 # ABSTRACT: ECMAScript-262, Edition 5, grammar
 
-our $VERSION = '0.015'; # VERSION
+our $VERSION = '0.016'; # TRIAL VERSION
 
 
 sub new {
@@ -30,11 +31,18 @@ sub new {
 sub _init {
     my ($self, %opts) = @_;
 
+    my $spacesAny = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::SpacesAny->new();
+    $self->{_spacesAny} = {
+	grammar => $spacesAny,
+	impl => MarpaX::Languages::ECMAScript::AST::Impl->new($spacesAny->grammar_option(), $spacesAny->recce_option())
+    };
+
     my $program = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program->new();
     $self->{_program} = {
 	grammar => $program,
 	impl => MarpaX::Languages::ECMAScript::AST::Impl->new($program->grammar_option(), $program->recce_option())
     };
+    $program->spacesAny($self->spacesAny);
 
     my $JSON = MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::JSON->new();
     $self->{_JSON} = {
@@ -109,6 +117,13 @@ sub pattern {
 }
 
 
+sub spacesAny {
+    my ($self) = @_;
+
+    return $self->{_spacesAny};
+}
+
+
 1;
 
 __END__
@@ -123,7 +138,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5 - ECMAScript-262, 
 
 =head1 VERSION
 
-version 0.015
+version 0.016
 
 =head1 SYNOPSIS
 
@@ -260,6 +275,22 @@ A MarpaX::Languages::ECMAScript::AST::Impl object
 =head2 pattern()
 
 Returns the Pattern grammar as a hash reference that is
+
+=over
+
+=item grammar
+
+A MarpaX::Languages::ECMAScript::AST::Grammar::Base object
+
+=item impl
+
+A MarpaX::Languages::ECMAScript::AST::Impl object
+
+=back
+
+=head2 spacesAny()
+
+Returns the SpacesAny grammar as a hash reference that is
 
 =over
 

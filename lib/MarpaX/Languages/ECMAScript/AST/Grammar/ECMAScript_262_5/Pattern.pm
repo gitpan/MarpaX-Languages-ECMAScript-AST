@@ -11,7 +11,7 @@ use Scalar::Util qw/blessed/;
 
 # ABSTRACT: ECMAScript-262, Edition 5, pattern grammar written in Marpa BNF
 
-our $VERSION = '0.015'; # VERSION
+our $VERSION = '0.016'; # TRIAL VERSION
 
 
 #
@@ -139,7 +139,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern - ECMAScr
 
 =head1 VERSION
 
-version 0.015
+version 0.016
 
 =head1 SYNOPSIS
 

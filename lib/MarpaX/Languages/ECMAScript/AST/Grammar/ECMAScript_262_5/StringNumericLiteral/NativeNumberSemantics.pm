@@ -7,8 +7,8 @@ use Math::BigFloat;
 use Scalar::Util qw/blessed/;
 use Scalar::Util::Numeric qw/isinf isnan/;
 
-our $POS_ZERO = have_signed_zero() ? Data::Float::pos_zero()     : Math::BigFloat->bzero();
-our $NEG_ZERO = have_signed_zero() ? Data::Float::neg_zero()     : Math::BigFloat->bzero();   # No -0 with Math::BigFloat.
+our $POS_ZERO = have_signed_zero() ? Data::Float::pos_zero()     : 0;
+our $NEG_ZERO = have_signed_zero() ? Data::Float::neg_zero()     : 0;
 our $POS_INF  = have_infinite()    ? Data::Float::pos_infinity() : Math::BigFloat->binf();
 our $NEG_INF  = have_infinite()    ? Data::Float::neg_infinity() : Math::BigFloat->binf('-');
 our $POS_ONE  = +1;
@@ -18,7 +18,7 @@ our $UNDEF    = undef;
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical string numeric grammar default semantics package, using native perl representations
 
-our $VERSION = '0.015'; # VERSION
+our $VERSION = '0.016'; # TRIAL VERSION
 
 
 
@@ -56,6 +56,18 @@ sub mul {
 }
 
 
+sub div {
+    $_[0]->{_number} /= $_[1]->{_number};
+    return $_[0];
+}
+
+
+sub mod {
+    $_[0]->{_number} %= $_[1]->{_number};
+    return $_[0];
+}
+
+
 sub nan {
     $_[0]->{_number} = $NAN;
     return $_[0];
@@ -80,14 +92,83 @@ sub pos_zero {
 }
 
 
+sub neg_zero {
+    $_[0]->{_number} = $NEG_ZERO;
+    return $_[0];
+}
+
+
 sub pos_inf {
     $_[0]->{_number} = $POS_INF;
     return $_[0];
 }
 
 
+sub neg_inf {
+    $_[0]->{_number} = $NEG_INF;
+    return $_[0];
+}
+
+
 sub pow {
-    $_[0]->{_number} = 10 ** $_[1]->{_number};
+    $_[0]->{_number} **= $_[1]->{_number};
+    return $_[0];
+}
+
+
+sub and {
+    $_[0]->{_number} &= $_[1]->{_number};
+    return $_[0];
+}
+
+
+sub or {
+    $_[0]->{_number} |= $_[1]->{_number};
+    return $_[0];
+}
+
+
+sub xor {
+    $_[0]->{_number} ^= $_[1]->{_number};
+    return $_[0];
+}
+
+
+sub not {
+    $_[0]->{_number} = ~$_[0]->{_number};
+    return $_[0];
+}
+
+
+sub sqrt {
+    my $x = eval {sqrt($_[0]->{_number})};
+    if ($@) {
+      return $_[0]->nan();
+    }
+    return $_[0];
+}
+
+
+sub left_shift {
+    $_[0]->{_number} <<= $_[1]->{_number};
+    return $_[0];
+}
+
+
+sub right_shift {
+    $_[0]->{_number} >>= $_[1]->{_number};
+    return $_[0];
+}
+
+
+sub inc {
+    $_[0]->{_number} += 1;
+    return $_[0];
+}
+
+
+sub dec {
+    $_[0]->{_number} -= 1;
     return $_[0];
 }
 
@@ -323,7 +404,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::StringNumericLite
 
 =head1 VERSION
 
-version 0.015
+version 0.016
 
 =head1 DESCRIPTION
 
@@ -385,6 +466,18 @@ Host implementation of $self's number multiplied by $objmul's number. Returns $s
 
 Should be overwriten in case of alternate implementation.
 
+=head2 div($self, $objdiv)
+
+Host implementation of $self's number divided by $objdiv's number. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 mod($self, $objmod)
+
+Host implementation of $self's number modulus $objmod's number. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
 =head2 nan($self)
 
 Host implementation of $self's number setted to nan, defaulting to Data::Float::nan if your host have it, Math::BigFloat's implementation otherwise. Returns $self.
@@ -409,15 +502,81 @@ Host implementation of $self's number setted to positive zero, defaulting to Dat
 
 Should be overwriten in case of alternate implementation.
 
+=head2 neg_zero($self)
+
+Host implementation of $self's number setted to negative zero, defaulting to Data::Float::neg_zero if your host have signed zeroes, 0 otherwise. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
 =head2 pos_inf($self)
 
-Host implementation of $self's number setted to positive infinity, defaulting to Data::Float::pos_infinity if your host have infinity, otherwise a trial between (~0)**(~0) and {my $n = 2; $n *= $n while $n < $n*$n; $n}. Return $self.
+Host implementation of $self's number setted to positive infinity, defaulting to Data::Float::pos_infinity if your host have infinity, Math::BigFloat->binf() otherwise. Return $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 neg_inf($self)
+
+Host implementation of $self's number setted to negative infinity, defaulting to Data::Float::neg_infinity if your host have infinity, Math::BigFloat->binf('-') otherwise. Return $self.
 
 Should be overwriten in case of alternate implementation.
 
 =head2 pow($self, $powobj)
 
-Host implementation of $self's number setted to 10 ** $powobj's number. Returns $self.
+Host implementation of $self's number powered by $powobj's number (i.e. $self ** $powobj). Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 and($self, $andobj)
+
+Host implementation of $self's number bit-wise and with $andobj's number (i.e. $self & $andobj). Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 or($self, $orobj)
+
+Host implementation of $self's number bit-wise inclusive or with $orobj's number (i.e. $self | $powobj). Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 xor($self, $xorobj)
+
+Host implementation of $self's number bit-wise exclusive or with $xorobj's number (i.e. $self ^ $xorobj). Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 not($self)
+
+Host implementation of $self's number bit-wise not (i.e. ~$self). Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 sqrt($self)
+
+Host implementation of $self's number square root. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 left_shift($self, $shiftobj)
+
+Host implementation of $self's number left-shifted by $shiftobj's number in base 2 (i.e. $self <<= $shiftobj). Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 right_shift($self, $shiftobj)
+
+Host implementation of $self's number right-shifted by $shiftobj's number in base 2 (i.e. $self <<= $shiftobj). Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 inc($self)
+
+Host implementation of $self's number incremented by one. Returns $self.
+
+Should be overwriten in case of alternate implementation.
+
+=head2 dec($self)
+
+Host implementation of $self's number decremented by one. Returns $self.
 
 Should be overwriten in case of alternate implementation.
 

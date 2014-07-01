@@ -8,7 +8,7 @@ package MarpaX::Languages::ECMAScript::AST::Grammar;
 use MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5;
 use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 
-our $VERSION = '0.015'; # VERSION
+our $VERSION = '0.016'; # TRIAL VERSION
 
 
 sub new {
@@ -71,6 +71,12 @@ sub URI {
 }
 
 
+sub spacesAny {
+    my ($self) = @_;
+    return $self->{_grammar}->spacesAny;
+}
+
+
 1;
 
 __END__
@@ -85,7 +91,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar - ECMAScript grammar written in Marp
 
 =head1 VERSION
 
-version 0.015
+version 0.016
 
 =head1 SYNOPSIS
 
@@ -145,19 +151,23 @@ Returns the generic template associated to grammarName.
 
 =head2 stringNumericLiteral($self)
 
-Returns the generic stringNumericLiteral associated to grammarName.
+Returns the stringNumericLiteral grammar.
 
 =head2 pattern($self)
 
-Returns the generic pattern associated to grammarName.
+Returns the pattern grammar.
 
 =head2 JSON($self)
 
-Returns the generic JSON associated to grammarName.
+Returns the JSON grammar.
 
 =head2 URI($self)
 
-Returns the generic URI associated to grammarName.
+Returns the URI grammar.
+
+=head2 spacesAny($self)
+
+Returns the spacesAny grammar.
 
 =head1 SEE ALSO
 
