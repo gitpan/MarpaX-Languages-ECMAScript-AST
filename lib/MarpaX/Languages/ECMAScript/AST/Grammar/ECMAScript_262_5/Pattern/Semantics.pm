@@ -31,7 +31,7 @@ use constant {
 
 # ABSTRACT: ECMAScript 262, Edition 5, pattern grammar default semantics package
 
-our $VERSION = '0.016'; # TRIAL VERSION
+our $VERSION = '0.017'; # VERSION
 
 
 sub new {
@@ -1008,7 +1008,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Pattern::Semantic
 
 =head1 VERSION
 
-version 0.016
+version 0.017
 
 =head1 DESCRIPTION
 

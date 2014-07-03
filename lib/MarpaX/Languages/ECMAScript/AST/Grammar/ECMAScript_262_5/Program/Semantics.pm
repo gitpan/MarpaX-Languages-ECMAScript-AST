@@ -9,7 +9,7 @@ our $StringLiteralImpl = MarpaX::Languages::ECMAScript::AST::Impl->new($StringLi
 
 # ABSTRACT: ECMAScript 262, Edition 5, lexical expressions grammar actions
 
-our $VERSION = '0.016'; # TRIAL VERSION
+our $VERSION = '0.017'; # VERSION
 
 use constant AST => 'MarpaX::Languages::ECMAScript::AST';
 
@@ -29,7 +29,16 @@ sub valuesAndRuleId {
   # Note: we do not include Marpa explicitely: this is done in one unique
   # place, i.e. Impl.pm.
   #
-  return {values => [ @_ ], ruleId => $Marpa::R2::Context::rule};
+  my $ruleId = $Marpa::R2::Context::rule;
+  #
+  # Note: $Marpa::R2::Context::grammar->rule($ruleId) returns an array
+  #
+  if (! defined($self->{ruleId2Lhs}->[$ruleId])) {
+    my ($lhs, @rhs) = $Marpa::R2::Context::grammar->rule($ruleId);
+    $self->{ruleId2Lhs}->[$ruleId] = $lhs;
+    $self->{ruleId2Rhs}->[$ruleId] = \@rhs;;
+  }
+  return {values => [ @_ ], ruleId => $ruleId, lhs => $self->{ruleId2Lhs}->[$ruleId], rhs => $self->{ruleId2Rhs}->[$ruleId]};
 }
 
 
@@ -61,7 +70,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program::Semantic
 
 =head1 VERSION
 
-version 0.016
+version 0.017
 
 =head1 DESCRIPTION
 

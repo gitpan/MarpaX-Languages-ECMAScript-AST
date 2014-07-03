@@ -3,7 +3,7 @@ NAME
     AST
 
 VERSION
-    version 0.016
+    version 0.017
 
 SYNOPSIS
         use strict;

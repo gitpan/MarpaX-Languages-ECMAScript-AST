@@ -36,8 +36,6 @@ my @modules = qw(
   List::Compare::Functional
   List::Util
   Log::Any
-  Log::Any::Adapter
-  Log::Log4perl
   Marpa::R2
   Math::BigFloat
   Module::Util
