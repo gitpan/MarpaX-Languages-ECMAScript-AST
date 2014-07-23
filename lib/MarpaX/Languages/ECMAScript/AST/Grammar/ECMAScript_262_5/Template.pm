@@ -10,7 +10,7 @@ package MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Template;
 # ABSTRACT: Template for ECMAScript_262_5 transpilation using an AST
 
 
-our $VERSION = '0.017'; # VERSION
+our $VERSION = '0.018'; # VERSION
 
 
 sub new {
@@ -2884,14 +2884,14 @@ sub G1_156 {
 
     my $rc = '';
 
-    if (&{$self->{_g1Callback}}(@{$self->{_g1CallbackArgs}}, \$rc, 156, $value, $index, 'Block', 'LCURLY', 'StatementListopt', 'RCURLY')) {
+    if (&{$self->{_g1Callback}}(@{$self->{_g1CallbackArgs}}, \$rc, 156, $value, $index, 'Block', 'LCURLY_BLOCK', 'StatementListopt', 'RCURLY')) {
         if ($index == 0) {
-            $rc = $self->lexeme('LCURLY', 156, $value, 0, 'Block', 'LCURLY', 'StatementListopt', 'RCURLY');
+            $rc = $self->lexeme('LCURLY_BLOCK', 156, $value, 0, 'Block', 'LCURLY_BLOCK', 'StatementListopt', 'RCURLY');
         }
         elsif ($index == 1) {
         }
         elsif ($index == 2) {
-            $rc = $self->lexeme('RCURLY', 156, $value, 2, 'Block', 'LCURLY', 'StatementListopt', 'RCURLY');
+            $rc = $self->lexeme('RCURLY', 156, $value, 2, 'Block', 'LCURLY_BLOCK', 'StatementListopt', 'RCURLY');
         }
     }
 
@@ -4556,7 +4556,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Template - Templa
 
 =head1 VERSION
 
-version 0.017
+version 0.018
 
 =head1 DESCRIPTION
 
@@ -5538,7 +5538,7 @@ $value is the value of RHS No $index (starting at 0).
 
 =head2 G1_156($self, $value, $index)
 
-Transpilation of G1 rule No 156, i.e. Block ::= LCURLY StatementListopt RCURLY
+Transpilation of G1 rule No 156, i.e. Block ::= LCURLY_BLOCK StatementListopt RCURLY
 
 $value is the value of RHS No $index (starting at 0).
 

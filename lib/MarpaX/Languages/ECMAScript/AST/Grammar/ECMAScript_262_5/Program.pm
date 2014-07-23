@@ -22,7 +22,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical program grammar written in Marpa BNF
 
-our $VERSION = '0.017'; # VERSION
+our $VERSION = '0.018'; # VERSION
 
 our $WhiteSpace        = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsWhiteSpace}])/;
 our $LineTerminator    = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsLineTerminator}])/;
@@ -59,6 +59,11 @@ our @NullLiteral = qw/null/;
 
 our @BooleanLiteral = qw/true false/;
 
+#
+# Force eventual higher priority
+#
+our %PRIORITY = (FUNCTION => 2);
+
 our $grammar_content = do {local $/; <DATA>};
 
 #
@@ -77,9 +82,9 @@ our %BooleanLiteral           = map {($_, uc($_))} @BooleanLiteral;
 #
 $grammar_content .= "\n";
 # ... Priorities
-map {$grammar_content .= ":lexeme ~ <$_> priority => 1\n"} values %Keyword;
-map {$grammar_content .= ":lexeme ~ <$_> priority => 1\n"} values %NullLiteral;
-map {$grammar_content .= ":lexeme ~ <$_> priority => 1\n"} values %BooleanLiteral;
+map {$grammar_content .= ":lexeme ~ <$_> priority => " . ($PRIORITY{$_} || 1) . "\n"} values %Keyword;
+map {$grammar_content .= ":lexeme ~ <$_> priority => " . ($PRIORITY{$_} || 1) . "\n"} values %NullLiteral;
+map {$grammar_content .= ":lexeme ~ <$_> priority => " . ($PRIORITY{$_} || 1) . "\n"} values %BooleanLiteral;
 # ... Definition
 map {$grammar_content .= uc($_) . " ~ '$_'\n"} @Keyword;
 map {$grammar_content .= uc($_) . " ~ '$_'\n"} @NullLiteral;
@@ -492,7 +497,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program - ECMAScr
 
 =head1 VERSION
 
-version 0.017
+version 0.018
 
 =head1 SYNOPSIS
 
@@ -804,7 +809,7 @@ Statement ::=
   | DebuggerStatement
 
 Block ::=
-    LCURLY  StatementListopt  RCURLY
+    LCURLY_BLOCK  StatementListopt  RCURLY
 
 StatementList ::=
     Statement
@@ -843,10 +848,16 @@ EmptyStatement ::=
     VISIBLE_SEMICOLON
 
 #
-# Not easy to do lookahead with a prediction event: nothing guarantees we really
-# enter this rule. Using a nulled event on the other hand guarantees we have
-# done this rule: we will check within an event if it is starting with the forbidden
-# LCURLY or 'function'
+# A note in the spec says:
+#
+# An ExpressionStatement cannot start with an opening curly brace because that might
+# make it ambiguous with a Block.
+# Also, an ExpressionStatement cannot start with the function keyword because that might
+# make it ambiguous with a FunctionDeclaration.
+#
+# To solve this:
+# - we associate an explicit lexeme to Block with priority 2: LCURLY_BLOCK
+# - we explicitely raise the priority of 'function' keyword to 2 as well
 #
 ExpressionStatement ::=
     Expression  SEMICOLON # [lookahead not in LCURLY, 'function']
@@ -996,11 +1007,13 @@ _S_ANY ~ _S*
 
 # - An invisible semicolon is a lexeme that should be at least as long as _S_MANY when _S_MANY matches.
 #   With this constraint: it must contain a LineTerminator.
-#   This mean that when the grammar is expecting a SEMICOLON, there is no VISIBLE_SEMICOLON (i.e. a
+#   This mean that when the grammar is expecting a SEMICOLON, but there is no VISIBLE_SEMICOLON (i.e. a
 #   true physical ';' in the input), but finds that it can match both _S_MANY and INVISIBLE_SEMICOLON
-#   it will take INVISIBLE_SEMICOLON instead of the discardable _S_MANY.
+#   it will automatically insert INVISIBLE_SEMICOLON instead of the discardable _S_MANY.
 #   The subtility is that when INVISIBLE_SEMICOLON matches, we know per-def this is an automatic
 #   semicolon insertion: grammar expected a semicolon, and found it hidden.
+#
+# - Obviously, the presence of a true VISIBLE_SEMICOLON should have higher priority
 #
 :lexeme ~ <INVISIBLE_SEMICOLON> pause => before event => '^INVISIBLE_SEMICOLON'
 INVISIBLE_SEMICOLON ~ _S_ANY _SLT _S_ANY
@@ -1117,10 +1130,14 @@ RPAREN ~ ')'
 LBRACKET ~ '['
 RBRACKET ~ ']'
 SEMICOLON ~ ';'
+:lexeme ~ <VISIBLE_SEMICOLON> priority => 1
 VISIBLE_SEMICOLON ~ ';'
 #
 # This event is NOT needed. I let its processing in _eventCallback for archiving purpose
-LCURLY ~ '{'
+_LCURLY ~ '{'
+:lexeme ~ <LCURLY_BLOCK> priority => 1
+LCURLY_BLOCK ~ _LCURLY
+LCURLY ~ _LCURLY
 RCURLY ~ '}'
 COLON ~ ':'
 COMMA ~ ','

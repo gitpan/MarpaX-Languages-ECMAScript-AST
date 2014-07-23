@@ -10,7 +10,7 @@ use MarpaX::Languages::ECMAScript::AST::Exceptions qw/:all/;
 
 # ABSTRACT: ECMAScript, grammars base package
 
-our $VERSION = '0.017'; # VERSION
+our $VERSION = '0.018'; # VERSION
 
 #
 # Note: because this module is usually subclasses, internal methods are called
@@ -109,7 +109,9 @@ sub recce_option {
 
 sub make_recce_option {
     my ($class, $spec) = @_;
-    return {ranking_method => $class->make_ranking_method, semantics_package => $class->make_semantics_package};
+    return {ranking_method => $class->make_ranking_method,
+            semantics_package => $class->make_semantics_package,
+            too_many_earley_items => $class->make_too_many_earley_items};
 }
 
 
@@ -122,6 +124,12 @@ sub make_ranking_method {
 sub make_semantics_package {
     my ($class) = @_;
     return join('::', __PACKAGE__, 'DefaultSemanticsPackage');
+}
+
+
+sub make_too_many_earley_items {
+    my ($class) = @_;
+    return 0;
 }
 
 
@@ -248,18 +256,24 @@ sub parse {
 
 
 sub value {
-  my ($self, $impl) = @_;
+  my ($self, $impl, $optionsp) = @_;
 
-  my $rc = $impl->value() || do {
-      my $lastExpression = _show_last_expression($self, $impl);
-      $impl->destroy_R;
-      InternalError(error => sprintf('%s', $lastExpression))
+  $optionsp //= {};
+  my $traverserp = $optionsp->{traverser};
+  my $traverserscratchpadp = $optionsp->{traverserscratchpad} // {};
+
+  my $asf = defined($traverserp) ? Marpa::R2::ASF->new({slr => $impl->R}) : undef;
+  my $rc = (defined($asf) ? $asf->traverse($traverserscratchpadp, $traverserp) : $impl->value()) || do {
+    my $lastExpression = _show_last_expression($self, $impl);
+    $impl->destroy_R;
+    InternalError(error => sprintf('%s', $lastExpression))
   };
+
   if (! defined($rc)) {
       $impl->destroy_R;
       InternalError(error => 'Undefined parse tree value');
   }
-  if (defined($impl->value())) {
+  if ((! defined($asf)) && defined(my $rc2 = $impl->value())) {
       $impl->destroy_R;
       InternalError(error => 'More than one parse tree value');
   }
@@ -350,7 +364,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::Base - ECMAScript, grammars base pa
 
 =head1 VERSION
 
-version 0.017
+version 0.018
 
 =head1 SYNOPSIS
 
@@ -410,27 +424,31 @@ Returns recommended option for Marpa::R2::Scanless::R->new(), returned as a refe
 
 Class method that returns default recce options for a given ECMA specification $spec.
 
-=head2 ranking_method($class)
+=head2 make_ranking_method($class)
 
 Class method that returns recommended recce ranking_method
 
-=head2 semantics_package($class)
+=head2 make_semantics_package($class)
 
 Class method that returns a default recce semantics_package, doing nothing else but a new().
 
+=head2 make_too_many_earley_items($class)
+
+Class method that returns a default recce too_many_earley_items option, default is 0 i.e. disable them.
+
 =head2 parse($self, $source, $impl, [$optionsp], [$start], [$length])
 
-Parse the source given as reference to a scalar, using implementation $impl, an optional reference to a options that is a hash that can contain:
+Parse the source given as reference to a scalar, using implementation $impl, an optional reference to a hash that can contain:
 
 =over
 
-=item callbackargsp
+=item callback
 
 Callbak Code Reference. Default is undef.
 
 =item callbackargs
 
-Reference to an array of Callback Code Reference first arguments. Default is [].
+Reference to an array of callback routine arguments. Default is [].
 
 =item failure
 
@@ -438,7 +456,7 @@ Failure callback Code Reference. Default is undef.
 
 =item failureargs
 
-Reference to an array of Failure callback Code Reference first arguments. Default is [].
+Reference to an array of failure routine arguments. Default is [].
 
 =item end
 
@@ -446,15 +464,29 @@ End callback Code Reference. Default is undef.
 
 =item endargs
 
-Reference to an array of End callback Code Reference first arguments. Default is [].
+Reference to an array of end routine arguments. Default is [].
 
 =back
 
 This method must be called as a super method by grammar using this package as a parent. $self must be a reference to a grammar instantiated via MarpaX::Languages::ECMAScript::AST::Grammar. The callback code will always be called with: per-callback arguments, $source, $pos (i.e. current position), $max (i.e. max position), $impl (i.e. a MarpaX::Languages::ECMAScript::AST::Impl instance). The default and failure callbacks must always return the new position in the stream, and raise a MarpaX::Languages::ECMAScript::AST::Exception::SyntaxError exception if there is an error. In the 'end' and 'failure' callbacks, $pos is not meaningful: this is the last position where external scanning restarted. You might want to look to the getLastLexeme() method. Output of the 'end' callback is ignored. Please note that this method explicitely creates a recognizer using $impl->make_R(), destroyed in case of error.
 
-=head2 value($self, $impl)
+=head2 value($self, $impl, $optionsp)
 
 Return the parse tree (unique) value. $impl is the recognizer instance for the grammar. Will raise an InternalError exception if there is no parse tree value, or more than one parse tree value. Please note that this method explicity destroys the recognizer using $impl->destroy_R. Value itself is an AST where every string is a perl string.
+
+An optional reference to a hash that can contain:
+
+=over
+
+=item traverser
+
+CODE traverser callback. If setted, and ASF will be performed using this callback. Default is to called Marpa::R2's value() directly.
+
+=item traverserscratchpad
+
+Reference to a scratchpad for the traverse. Default is {}.
+
+=back
 
 =head2 getLexeme($self, $lexemeHashp, $impl)
 

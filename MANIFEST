@@ -46,6 +46,8 @@ t/asi.t
 t/backbone-1.1.0.min.t
 t/backbone-1.1.0.t
 t/github_issue_0001.t
+t/github_issue_0003.t
+t/github_issue_0004.t
 t/jquery-1.10.2.min.t
 t/jquery-1.10.2.t
 t/jquery-2.0.3.min.t
