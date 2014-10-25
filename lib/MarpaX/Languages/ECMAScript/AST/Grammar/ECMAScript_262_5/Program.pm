@@ -22,7 +22,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, lexical program grammar written in Marpa BNF
 
-our $VERSION = '0.018'; # VERSION
+our $VERSION = '0.019'; # VERSION
 
 our $WhiteSpace        = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsWhiteSpace}])/;
 our $LineTerminator    = qr/(?:[\p{MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::CharacterClasses::IsLineTerminator}])/;
@@ -233,13 +233,25 @@ sub _eventCallback {
 	}
       my $postLineTerminatorPos = $lastLexeme{start} + $lastLexeme{length};
       my $postLineTerminatorLength = ($self->{_postLineTerminatorLength}->{$postLineTerminatorPos} //= $self->_postLineTerminatorLength($source, $postLineTerminatorPos, $impl));
+      my $asi = 0;
       if ($postLineTerminatorLength > 0) {
-	  $impl->lexeme_read('SEMICOLON', $postLineTerminatorPos, $postLineTerminatorLength, ';');
+	  if (! $impl->lexeme_read('SEMICOLON', $postLineTerminatorPos, $postLineTerminatorLength, ';')) {
+	      SyntaxError(error => "SEMICOLON lexeme_read failure at position $rc");
+	  }
+	  $asi = 1;
       }
       my $lname = $name;
       substr($lname, 0, 1, '');
       my $lvalue = ($lname eq 'PLUSPLUS_POSTFIX') ? '++' : '--';
-      $impl->lexeme_read($lname, $rc, 2, $lvalue);
+      #
+      # The value does not change if ASI was performed. But the name, yes.
+      #
+      if ($asi) {
+	  $lname = ($lname eq 'PLUSPLUS_POSTFIX') ? 'PLUSPLUS' : 'MINUSMINUS';
+      }
+      if (! $impl->lexeme_read($lname, $rc, 2, $lvalue)) {
+	  SyntaxError(error => "$lname lexeme_read failure at position $rc");
+      }
       $rc += 2;
     }
     #
@@ -251,7 +263,9 @@ sub _eventCallback {
           index($source, '/=', $realpos) != $realpos &&
           index($source, '//', $realpos) != $realpos &&
           index($source, '/*', $realpos) != $realpos) {
-        $impl->lexeme_read('DIV', $realpos, 1, '/');
+        if (! $impl->lexeme_read('DIV', $realpos, 1, '/')) {
+	    SyntaxError(error => "DIV lexeme_read failure at position $rc");
+	}
         $rc = $realpos + 1;
       }
     }
@@ -263,7 +277,9 @@ sub _eventCallback {
       if (index($source, '/=', $realpos) == $realpos &&
           index($source, '//', $realpos) != $realpos &&
           index($source, '/*', $realpos) != $realpos) {
-        $impl->lexeme_read('DIVASSIGN', $realpos, 2, '/=');
+        if (! $impl->lexeme_read('DIVASSIGN', $realpos, 2, '/=')) {
+	    SyntaxError(error => "DIVASSIGN lexeme_read failure at position $rc");
+	}
         $rc = $realpos + 2;
       }
     }
@@ -489,7 +505,7 @@ sub _endCallback {
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -497,7 +513,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::Program - ECMAScr
 
 =head1 VERSION
 
-version 0.018
+version 0.019
 
 =head1 SYNOPSIS
 

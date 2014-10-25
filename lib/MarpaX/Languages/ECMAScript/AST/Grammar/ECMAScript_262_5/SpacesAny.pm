@@ -10,7 +10,7 @@ use SUPER;
 
 # ABSTRACT: ECMAScript-262, Edition 5, spaces only grammar written in Marpa BNF
 
-our $VERSION = '0.018'; # VERSION
+our $VERSION = '0.019'; # VERSION
 
 #
 # We reuse Program grammar, only a subset of it -;
@@ -66,7 +66,7 @@ sub _endCallback {
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -74,7 +74,7 @@ MarpaX::Languages::ECMAScript::AST::Grammar::ECMAScript_262_5::SpacesAny - ECMAS
 
 =head1 VERSION
 
-version 0.018
+version 0.019
 
 =head1 SYNOPSIS
 

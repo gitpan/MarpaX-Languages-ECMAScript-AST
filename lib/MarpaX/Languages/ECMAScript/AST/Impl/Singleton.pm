@@ -10,7 +10,7 @@ use Log::Any qw/$log/;
 
 # ABSTRACT: Singleton hosting all the grammar precompiled Marpa::R2::Scanless::G objects
 
-our $VERSION = '0.018'; # VERSION
+our $VERSION = '0.019'; # VERSION
 
 
 sub _new_instance {
@@ -65,7 +65,7 @@ __END__
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -73,7 +73,7 @@ MarpaX::Languages::ECMAScript::AST::Impl::Singleton - Singleton hosting all the 
 
 =head1 VERSION
 
-version 0.018
+version 0.019
 
 =head1 DESCRIPTION
 

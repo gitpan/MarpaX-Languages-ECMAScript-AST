@@ -24,7 +24,7 @@ our $CACHE = CHI->new(driver => 'File',
                       namespace => 'cache',
 		      max_key_length => 32);
 
-our $VERSION = '0.018'; # VERSION
+our $VERSION = '0.019'; # VERSION
 our $CURRENTVERSION;
 {
   #
@@ -271,7 +271,7 @@ __END__
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -279,7 +279,7 @@ MarpaX::Languages::ECMAScript::AST - Translate a ECMAScript source to an AST
 
 =head1 VERSION
 
-version 0.018
+version 0.019
 
 =head1 SYNOPSIS
 
@@ -442,6 +442,8 @@ L<https://github.com/jddurand/marpax-languages-ecmascript-ast>
 Jean-Damien Durand <jeandamiendurand@free.fr>
 
 =head1 CONTRIBUTOR
+
+=for stopwords jddurand
 
 jddurand <jeandamiendurand@free.fr>
 
